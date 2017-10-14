@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <math.h>
 
+//-------------------Functions-------------------
+double vZ(double H, double w, double t, double I, double J, int N, int gama, double e);
+
 void main() {
-	printf("teste");
+	printf("Resultado: %f", vZ(10, 5, 2, 1, 1, 20, 1, 1));
 }
 
 /**
@@ -390,4 +393,14 @@ double brute_J(int N, double x0, double y0, double z0, double xl0, double yl0, d
     result = sum;
     
     return result;
+}
+
+double vZ(double H, double w, double t, double I, double J, int N, int gama, double e) {
+	double result1 = (-H) * w * sin(w * t);
+	double result2 = I * w * cos(w * t);
+	double result3 = 0;;
+	for (int n = 1; n <= N; n++) {
+		result3 += J * ((-n) * gama * pow(e, -(n * gama * t)));
+	}
+	return result1 + result2 + result3;
 }
