@@ -2,10 +2,15 @@
 #include <math.h>
 
 //-------------------Functions-------------------
-double vZ(double H, double w, double t, double I, double J, int N, int gama, double e);
+double vX(double A, double w, double t, double B, double E, double F, int N, int gama);
+double vY(double H, double w, double t, double I, double J, int N, int gama);
+double vZ(double H, double w, double t, double I, double J, int N, int gama);
+double A, B, C, D, E, F, G, H, I, J;
+
+//#define int N = 20;
 
 void main() {
-	printf("Resultado: %f", vZ(10, 5, 2, 1, 1, 20, 1, 1));
+	printf("Resultado: %f", vY(10, 5, 2, 1, 1, 20, 1));
 }
 
 /**
@@ -28,7 +33,7 @@ void main() {
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de A
 * @returns O coeficiênte A dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_A (int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez) {
+double brute_A (int N, double y0, double xl0, double gama, double X, double w, double vex, double vey) {
     double result = 0;
     int n;
     double aux;
@@ -38,15 +43,15 @@ double brute_A (int N, double x0, double y0, double z0, double xl0, double yl0, 
 
     //Calculo do somatorio
     for (n = 1; n <= N; n++) {
-        aux = (1/(n*pow(X, n)))*(1/(1+pow(((n*Y)/w),2)))*(((2*vex)/w)+((n*Y*vey)/(w*w)));
-        if (n%2 == 0) {
-            sum -= aux;
-        } else {
-            sum += aux;
+//		aux = (1/(n*pow(X, n)))*(1/(1+pow(((n*Y)/w),2)))*(((2*vex)/w)+((n*Y*vey)/(w*w)));
+		aux = (1/(n*pow(X, n)))*(1/(1+((n*gama)/w)*((n*gama)/w)))*(((2*vex)/w)+((n*gama*vey)/(w*w)));
+        if (n%2 == 0) {//iteração Par
+            aux = -aux;
         }
+        sum += aux;
     }
 
-    result-= sum;
+    result+= sum;
 
     return result;
 }
@@ -71,7 +76,7 @@ double brute_A (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de B
 * @returns O coeficiênte B dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_B (int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez){
+double brute_B (int N, double yl0, double gama, double X, double w, double vex, double vey){
     double result = 0;
     double sum = 0;
     int n;
@@ -81,7 +86,8 @@ double brute_B (int N, double x0, double y0, double z0, double xl0, double yl0, 
 
     //Calculo do somatorio
     for (n = 1; n <= N; n++) {
-        aux = (1/(n*pow(X,n)))*(1/(1+pow(((n*Y)/w),2)))*(vey/w + (2*n*Y*vex)/(w*w));
+//      aux = (1/(n*pow(X,n)))*(1/(1+pow(((n*Y)/w),2)))*(vey/w + (2*n*Y*vex)/(w*w));
+        aux = (1/(n*pow(X,n)))*(1/(1+pow(((n*gama)/w),2)))*(vey/w + (n*gama*vex)/(w*w));
         if (n%2 == 0) {//iteração Par
             aux = -aux;
         }
@@ -113,20 +119,17 @@ double brute_B (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de C
 * @returns O somatório dos coeficiêntes Cn dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_C (int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez){
+double brute_C (int n, double gama, double X, double w, double vex, double vey){
     double result = 0;
-    int n;
     double aux;
 
     //Calculo do somatorio Cn
-    for (n = 1; n <= N; n++) {
-        aux = pow(n,a)*vex/(n*pow(X,n)*(1+pow((n*Y/w),2))) + n*Y*pow(n,a)*vey/(n*pow(X,n)*pow(w,2)*(1+pow((n*Y/w),2)));
-        if (n%2 == 0) {
-            aux = -aux;
-        }
-
-        result +=aux;
+    aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
+    if (n%2 == 0) {
+        aux = -aux;
     }
+
+    result +=aux;
 
     return result;
 }
@@ -151,10 +154,10 @@ double brute_C (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de D
 * @returns O coeficiênte D dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_D (int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez) {
+double brute_D (int N, double y0, double xl0, double Y, double X, double w, double vex) {
     double result = 0;
 
-    result -= (2*vex* log((X+1)/X))/w;
+    result -= (vex* log((X+1)/X))/w;
     result += 4*y0 - 2*xl0/w;
 
     return result;
@@ -181,7 +184,7 @@ double brute_D (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de E
 * @returns O coeficiênte E dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_E (int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez) {
+double brute_E (int N, double y0, double xl0, double X, double w, double vex) {
     double result = 0;
 
     result -=  3*vex*log((X+1)/X);
@@ -364,13 +367,35 @@ double brute_J(double Y, double X, double w, double vez, int n){
     return result;
 }
 
-double vZ(double H, double w, double t, double I, double J, int N, int gama, double e) {
+// vetor X da velocidade
+double vX(double A, double w, double t, double B, double E, double F, int N, int gama) {
+	double result1 = 2 * ( (A * w * cos(w * t)) + (B * w * sin(w * t)) ) + E;
+	double result2 = 0;
+	for (int n = 1; n <= N; n++) {
+		result2 += F * ((-n) * gama * pow(M_E, -(n * gama * t)));
+	}
+	return result1 + result2;
+}
+
+// vetor Y da velocidade
+double vY(double A, double w, double t, double B, double C, int N, int gama) {
+	double result1 = (-A) * w * sin(w * t);
+	double result2 = B * w * cos(w * t);
+	double result3 = 0;
+	for (int n = 1; n <= N; n++) {
+		result3 += C * ((-n) * gama * pow(M_E, -(n * gama * t)));
+	}
+	return result1 + result2 + result3;
+}
+
+// vetor Z da velocidade
+double vZ(double H, double w, double t, double I, double J, int N, int gama) {
 	double result1 = (-H) * w * sin(w * t);
 	double result2 = I * w * cos(w * t);
-	double result3 = 0;;
+	double result3 = 0;
 
 	for (int n = 1; n <= N; n++) {
-		result3 += J * ((-n) * gama * pow(e, -(n * gama * t)));
+		result3 += J * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
 
 	return result1 + result2 + result3;
