@@ -19,7 +19,7 @@ void main() {
 * @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de A
 * @param X Chi - Variável física Chi a ser calculado o valor de A
-* @param w 
+* @param w
 * @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
 *   a = 1  -> n^1
 *   a = 2  -> n^2
@@ -35,7 +35,7 @@ double brute_A (int N, double x0, double y0, double z0, double xl0, double yl0, 
     double sum = 0;
 
     result += (2*xl0)/w - 3*y0 +((2*vex)/w)*log((X+1)/X);
-     
+
     //Calculo do somatorio
     for (n = 1; n <= N; n++) {
         aux = (1/(n*pow(X, n)))*(1/(1+pow(((n*Y)/w),2)))*(((2*vex)/w)+((n*Y*vey)/(w*w)));
@@ -62,7 +62,7 @@ double brute_A (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de B
 * @param X Chi - Variável física Chi a ser calculado o valor de B
-* @param w 
+* @param w
 * @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
 *   a = 1  -> n^1
 *   a = 2  -> n^2
@@ -104,7 +104,7 @@ double brute_B (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de C
 * @param X Chi - Variável física Chi a ser calculado o valor de C
-* @param w 
+* @param w
 * @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
 *   a = 1  -> n^1
 *   a = 2  -> n^2
@@ -125,7 +125,7 @@ double brute_C (int N, double x0, double y0, double z0, double xl0, double yl0, 
             aux = -aux;
         }
 
-        result +=aux;   
+        result +=aux;
     }
 
     return result;
@@ -142,7 +142,7 @@ double brute_C (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de D
 * @param X Chi - Variável física Chi a ser calculado o valor de D
-* @param w 
+* @param w
 * @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
 *   a = 1  -> n^1
 *   a = 2  -> n^2
@@ -172,7 +172,7 @@ double brute_D (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de E
 * @param X Chi - Variável física Chi a ser calculado o valor de E
-* @param w 
+* @param w
 * @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
 *   a = 1  -> n^1
 *   a = 2  -> n^2
@@ -201,7 +201,7 @@ double brute_E (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de Fn
 * @param X Chi - Variável física Chi a ser calculado o valor de Fn
-* @param w 
+* @param w
 * @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
 *   a = 1  -> n^1
 *   a = 2  -> n^2
@@ -235,39 +235,35 @@ double brute_F(int N, double x0, double y0, double z0, double xl0, double yl0, d
 
 /**
 * Calcular coeficiente G do Rendezvous
+* @author Iago, Filipe e João
 * @param N Número de iterações no somatório interno
 * @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
-* @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
-* @param z0 valor no eixo z da posição relativa inicial entre o satélite e o detrito
-* @param xl0 valor no eixo x da velocidade relativa inicial entre o satélite e o detrito
 * @param yl0 valor no eixo y da velocidade relativa inicial entre o satélite e o detrito
-* @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de G
 * @param X Chi - Variável física Chi a ser calculado o valor de G
-* @param w 
-* @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
-*   a = 1  -> n^1
-*   a = 2  -> n^2
+* @param w
 * @param vex Variável física da Velocidade de exaustão no eixo X a ser calculado o valor de G
 * @param vey Variável física da Velocidade de exaustão no eixo Y a ser calculado o valor de G
-* @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de G
-* @returns O coeficiênte G dado os valores iniciais e as variáveis físicas a serem testadas
+* @returns o coeficiênte G dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_G (int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez) {
+double brute_G (int N, double x0, double yl0, double X, double w, double vex, double vey) {
     double result = 0;
     double sum = 0;
     int n;
     double aux;
 
     result= 2*yl0/w + x0 + (2*vey*(log((X+1)/X)))/w;
-    //Calculo do somatorio
-    for (n = 1; n <= N; n++) {
+
+		for (n = 1; n <= N; n++) {
         aux = 3*vex/(pow(n,2)*pow(X,n)*w);
-        if (n%2 == 0) {
+
+				if (n%2 == 0) {
             aux = -aux;
         }
+
         sum +=aux;
     }
+
     result-=sum;
 
     return result;
@@ -284,7 +280,7 @@ double brute_G (int N, double x0, double y0, double z0, double xl0, double yl0, 
 * @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de H
 * @param X Chi - Variável física Chi a ser calculado o valor de H
-* @param w 
+* @param w
 * @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
 *   a = 1  -> n^1
 *   a = 2  -> n^2
@@ -298,7 +294,7 @@ double brute_H (int N, double x0, double y0, double z0, double xl0, double yl0, 
     double sum = 0;
     int n;
     double aux;
-    
+
     result = z0;
     //Calculo do somatorio
     for (n = 1; n <= N; n++) {
@@ -315,30 +311,21 @@ double brute_H (int N, double x0, double y0, double z0, double xl0, double yl0, 
 
 /**
 * Calcular coeficiente I do Rendezvous
+* @author Iago, Filipe e João
 * @param N Número de iterações no somatório interno
-* @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
-* @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
-* @param z0 valor no eixo z da posição relativa inicial entre o satélite e o detrito
-* @param xl0 valor no eixo x da velocidade relativa inicial entre o satélite e o detrito
-* @param yl0 valor no eixo y da velocidade relativa inicial entre o satélite e o detrito
 * @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
 * @param Y Gama - Variável física Gama a ser calculado o valor de I
 * @param X Chi - Variável física Chi a ser calculado o valor de I
-* @param w 
-* @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
-*   a = 1  -> n^1
-*   a = 2  -> n^2
-* @param vex Variável física da Velocidade de exaustão no eixo X a ser calculado o valor de I
-* @param vey Variável física da Velocidade de exaustão no eixo Y a ser calculado o valor de I
+* @param w - velocidade angular
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de I
-* @returns O coeficiênte I dado os valores iniciais e as variáveis físicas a serem testadas
+* @returns o coeficiênte I dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_I (int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez) {
+double brute_I (int N, double zl0, double Y, double X, double w, double vez) {
     double result = 0;
     double sum = 0;
     int n;
     double aux;
-    
+
     result = zl0/w - (vez/w)*(log((X+1)/X));
 
     //Calculo do somatorio
@@ -357,41 +344,23 @@ double brute_I (int N, double x0, double y0, double z0, double xl0, double yl0, 
 
 /**
 * Calcular o somatório dos coeficientes Jn do Rendezvous
-* @param N Número de iterações no somatório interno
-* @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
-* @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
-* @param z0 valor no eixo z da posição relativa inicial entre o satélite e o detrito
-* @param xl0 valor no eixo x da velocidade relativa inicial entre o satélite e o detrito
-* @param yl0 valor no eixo y da velocidade relativa inicial entre o satélite e o detrito
-* @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
+* @author Iago, Filipe e João
 * @param Y Gama - Variável física Gama a ser calculado o valor de Jn
 * @param X Chi - Variável física Chi a ser calculado o valor de Jn
-* @param w 
-* @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
-*   a = 1  -> n^1
-*   a = 2  -> n^2
-* @param vex Variável física da Velocidade de exaustão no eixo X a ser calculado o valor de Jn
-* @param vey Variável física da Velocidade de exaustão no eixo Y a ser calculado o valor de Jn
+* @param w - velocidade angular
+* @param n - indíce do somatório
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de Jn
-* @returns O somatório coeficiênte Jn dado os valores iniciais e as variáveis físicas a serem testadas
+* @returns o somatório coeficiênte Jn dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_J(int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez){
+double brute_J(double Y, double X, double w, double vez, int n){
     double result = 0;
-    double sum = 0;
-    int n;
-    double aux;
 
-    for (n = 1; n <= N; n++) {
-        aux = vez/(n*pow(X,n)*w)/(1+pow((n*Y)/w,2));
-        if (n%2 == 0) {
-            aux = - aux;
-        }
-        aux *= pow(n,a);
-        sum += aux;
+    result = vez/(n*pow(X,n)*w)/(1+pow((n*Y)/w,2));
+
+    if (n%2 == 0) {
+        result = -result;
     }
-    
-    result = sum;
-    
+
     return result;
 }
 
@@ -399,8 +368,10 @@ double vZ(double H, double w, double t, double I, double J, int N, int gama, dou
 	double result1 = (-H) * w * sin(w * t);
 	double result2 = I * w * cos(w * t);
 	double result3 = 0;;
+
 	for (int n = 1; n <= N; n++) {
 		result3 += J * ((-n) * gama * pow(e, -(n * gama * t)));
 	}
+
 	return result1 + result2 + result3;
 }
