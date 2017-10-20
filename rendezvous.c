@@ -200,43 +200,24 @@ double brute_E (int N, double y0, double xl0, double X, double w, double vex) {
 
 /**
 * Calcular o somatório dos coeficientes Fn do Rendezvous
-* @param N Número de iterações no somatório interno
-* @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
-* @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
-* @param z0 valor no eixo z da posição relativa inicial entre o satélite e o detrito
-* @param xl0 valor no eixo x da velocidade relativa inicial entre o satélite e o detrito
-* @param yl0 valor no eixo y da velocidade relativa inicial entre o satélite e o detrito
-* @param zl0 valor no eixo z da velocidade relativa inicial entre o satélite e o detrito
+* @author Filipe e Jhone
 * @param Y Gama - Variável física Gama a ser calculado o valor de Fn
 * @param X Chi - Variável física Chi a ser calculado o valor de Fn
 * @param w
-* @param a - 0 - Potência utilizada dentro do somátorio para casos em que o indice do somátorio é utilizado elevado a potências diferentes
-*   a = 1  -> n^1
-*   a = 2  -> n^2
+* @param n Indice do somatório
 * @param vex Variável física da Velocidade de exaustão no eixo X a ser calculado o valor de Fn
 * @param vey Variável física da Velocidade de exaustão no eixo Y a ser calculado o valor de Fn
-* @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de Fn
-* @returns O somatório coeficiênte Fn dado os valores iniciais e as variáveis físicas a serem testadas
+* @returns O coeficiente F dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_F(int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez) {
+double brute_F(double Y, double X, double w, int n, double vex, double vey) {
     double result = 0;
-    double sum = 0;
-    int n;
-    double aux;
 
-
-    //Calculo do somatorio
-    for (n = 1; n <= N; n++) {
-        aux = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*Y))/((1+pow((n*Y)/w,2)));
-        if (n%2 == 0) {
-            aux = - aux;
-        }
-        aux -= vex/(n*Y);
-        aux *= pow(n,a);
-        sum += aux;
+    result = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*Y))/((1+pow((n*Y)/w,2)));
+    if (n%2 == 0) {
+        result = - result;
     }
-
-    result = sum;
+    result -= vex/(n*Y);
+    // aux *= pow(n,a); ??????
 
     return result;
 }
@@ -278,6 +259,7 @@ double brute_G (int N, double x0, double yl0, double X, double w, double vex, do
 }
 
 /**
+* Authors: Gledson e Jhone
 * Calcular coeficiente H do Rendezvous
 * @param N Número de iterações no somatório interno
 * @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
@@ -306,7 +288,7 @@ double brute_H (int N, double x0, double y0, double z0, double xl0, double yl0, 
     result = z0;
     //Calculo do somatorio
     for (n = 1; n <= N; n++) {
-        aux = ((vez*Y)/(pow(X,n)*pow(w,2)))/(1+pow((n*Y)/w,2));
+        aux = ((vex*Y)/(pow(Y,n)*(w*w)))/(1+((n*Y)/w)*((n*Y)/w));
         if (n%2 == 0) {
             aux = -aux;
         }
@@ -441,4 +423,13 @@ double vZ(double H, double w, double t, double I, double J, int N, int gama) {
 	}
 
 	return result1 + result2 + result3;
+}
+
+double dY (double A, double B, double C, double D, double Y, int N, double w, double t) {
+	double result1 = A*cos(w*t)+B*sin(w*t);
+	double result2 = 0;
+	for (int n = 1; n < N; ++n){
+		result2 = C*pow(M_E, -(n*w*t)) + D;
+	}
+	return result1 + result2;
 }
