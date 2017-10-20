@@ -15,6 +15,7 @@ void main() {
 
 /**
 * Calcular coeficiente A do Rendezvous
+* @author Weverson, Jhone, Gledson
 * @param N Número de iterações no somatório interno
 * @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
 * @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
@@ -58,6 +59,7 @@ double brute_A (int N, double y0, double xl0, double gama, double X, double w, d
 
 /**
 * Calcular coeficiente B do Rendezvous
+* @author Weverson, Jhone, Gledson
 * @param N Número de iterações no somatório interno
 * @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
 * @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
@@ -101,6 +103,7 @@ double brute_B (int N, double yl0, double gama, double X, double w, double vex, 
 
 /**
 * Calcular o somatório dos coeficientes Cn do Rendezvous
+* @author Weverson, Jhone, Gledson
 * @param N Número de iterações no somatório interno
 * @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
 * @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
@@ -136,6 +139,7 @@ double brute_C (int n, double gama, double X, double w, double vex, double vey){
 
 /**
 * Calcular coeficiente D do Rendezvous
+* @author Weverson, Jhone, Gledson
 * @param N Número de iterações no somatório interno
 * @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
 * @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
@@ -166,6 +170,7 @@ double brute_D (int N, double y0, double xl0, double Y, double X, double w, doub
 
 /**
 * Calcular coeficiente E do Rendezvous
+* @author Weverson, Jhone, Gledson
 * @param N Número de iterações no somatório interno
 * @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
 * @param y0 valor no eixo Y da posição relativa inicial entre o satélite e o detrito
@@ -367,7 +372,40 @@ double brute_J(double Y, double X, double w, double vez, int n){
     return result;
 }
 
-// vetor X da velocidade
+/* @author Weverson, Iago
+ * vetor X da distancia
+ */
+double dX(double w, double t, int N, int gama) {
+	double A = brute_A (1, 1, 1, 1, 1, 1, 1, 1);
+	double E = brute_E (1, 1, 1, 1, 1, 1);
+	double F = 
+	double result1 = 2 * (A * sin(w * t) - cos(w * t)) + E * t;
+	double result2 = G;
+	for (int n = 1; n <= N; n++) {
+		result2 += F * M_E * pow(M_E, -(n * gama * t));
+	}
+	return result1 + result2;
+}
+
+/* @author Weverson, Iago
+ * vetor Z da distancia
+ */
+double dZ(double H, double w, double t, double G, int N, int gama) {
+	double result1 = H * cos(w * t) + I * sin(w * t);
+	double result2 = G;
+	for (int n = 1; n <= N; n++) {
+		result2 += J * M_E * pow(M_E, -(n * gama * t));
+	}
+	return result1 - result2;
+}
+
+double rT() {
+	return sqrt(pow(dX,2) + pow(dY,2) + pow(dZ,2));
+}
+
+/* @author Weverson, Jhone, Gledson
+ * vetor X da velocidade
+ */
 double vX(double A, double w, double t, double B, double E, double F, int N, int gama) {
 	double result1 = 2 * ( (A * w * cos(w * t)) + (B * w * sin(w * t)) ) + E;
 	double result2 = 0;
@@ -377,7 +415,9 @@ double vX(double A, double w, double t, double B, double E, double F, int N, int
 	return result1 + result2;
 }
 
-// vetor Y da velocidade
+/* @author Weverson, Jhone, Gledson
+ * vetor Y da velocidade
+ */
 double vY(double A, double w, double t, double B, double C, int N, int gama) {
 	double result1 = (-A) * w * sin(w * t);
 	double result2 = B * w * cos(w * t);
@@ -388,7 +428,9 @@ double vY(double A, double w, double t, double B, double C, int N, int gama) {
 	return result1 + result2 + result3;
 }
 
-// vetor Z da velocidade
+/* @author Weverson
+ * vetor Z da velocidade
+ */
 double vZ(double H, double w, double t, double I, double J, int N, int gama) {
 	double result1 = (-H) * w * sin(w * t);
 	double result2 = I * w * cos(w * t);
