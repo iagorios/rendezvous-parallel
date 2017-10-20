@@ -273,6 +273,7 @@ double brute_G (int N, double x0, double yl0, double X, double w, double vex, do
 }
 
 /**
+* Authors: Gledson e Jhone
 * Calcular coeficiente H do Rendezvous
 * @param N Número de iterações no somatório interno
 * @param x0 valor no eixo X da posição relativa inicial entre o satélite e o detrito
@@ -301,7 +302,7 @@ double brute_H (int N, double x0, double y0, double z0, double xl0, double yl0, 
     result = z0;
     //Calculo do somatorio
     for (n = 1; n <= N; n++) {
-        aux = ((vez*Y)/(pow(X,n)*pow(w,2)))/(1+pow((n*Y)/w,2));
+        aux = ((vex*Y)/(pow(Y,n)*(w*w)))/(1+((n*Y)/w)*((n*Y)/w));
         if (n%2 == 0) {
             aux = -aux;
         }
@@ -399,4 +400,13 @@ double vZ(double H, double w, double t, double I, double J, int N, int gama) {
 	}
 
 	return result1 + result2 + result3;
+}
+
+double dY (double A, double B, double C, double D, double Y, int N, double w, double t) {
+	double result1 = A*cos(w*t)+B*sin(w*t);
+	double result2 = 0;
+	for (int n = 1; n < N; ++n){
+		result2 = C*pow(M_E, -(n*w*t)) + D;
+	}
+	return result1 + result2;
 }
