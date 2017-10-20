@@ -7,7 +7,7 @@ double vY(double H, double w, double t, double I, double J, int N, int gama);
 double vZ(double H, double w, double t, double I, double J, int N, int gama);
 double A, B, C, D, E, F, G, H, I, J;
 
-//#define int N = 20;
+static int const N = 20;
 
 void main() {
 	printf("Resultado: %f", vY(10, 5, 2, 1, 1, 20, 1));
@@ -78,7 +78,7 @@ double brute_A (int N, double y0, double xl0, double gama, double X, double w, d
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de B
 * @returns O coeficiênte B dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_B (int N, double yl0, double gama, double X, double w, double vex, double vey){
+double brute_B (double yl0, double gama, double X, double w, double vex, double vey) {
     double result = 0;
     double sum = 0;
     int n;
@@ -122,7 +122,7 @@ double brute_B (int N, double yl0, double gama, double X, double w, double vex, 
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de C
 * @returns O somatório dos coeficiêntes Cn dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_C (int n, double gama, double X, double w, double vex, double vey){
+double brute_C (int n, double gama, double X, double w, double vex, double vey) {
     double result = 0;
     double aux;
 
@@ -235,7 +235,7 @@ double brute_F(double Y, double X, double w, int n, double vex, double vey) {
 * @param vey Variável física da Velocidade de exaustão no eixo Y a ser calculado o valor de G
 * @returns o coeficiênte G dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_G (int N, double x0, double yl0, double X, double w, double vex, double vey) {
+double brute_G (double x0, double yl0, double X, double w, double vex, double vey) {
     double result = 0;
     double sum = 0;
     int n;
@@ -279,7 +279,7 @@ double brute_G (int N, double x0, double yl0, double X, double w, double vex, do
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de H
 * @returns O coeficiênte H dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_H (int N, double x0, double y0, double z0, double xl0, double yl0, double zl0, double Y, double X, double w, int a, double vex, double vey, double vez) {
+double brute_H (double z0, double Y, double w, double vex) {
     double result = 0;
     double sum = 0;
     int n;
@@ -357,10 +357,10 @@ double brute_J(double Y, double X, double w, double vez, int n){
 /* @author Weverson, Iago
  * vetor X da distancia
  */
-double dX(double w, double t, int N, int gama) {
+double dX(double w, double t, int gama) {
 	double A = brute_A (1, 1, 1, 1, 1, 1, 1, 1);
 	double E = brute_E (1, 1, 1, 1, 1, 1);
-	double F = 
+	double F = brute_F(1, 1, 1, 1, 1, 1);
 	double result1 = 2 * (A * sin(w * t) - cos(w * t)) + E * t;
 	double result2 = G;
 	for (int n = 1; n <= N; n++) {
@@ -369,10 +369,24 @@ double dX(double w, double t, int N, int gama) {
 	return result1 + result2;
 }
 
+double dY (double w, double t) {
+	double A = brute_A (1, 1, 1, 1, 1, 1, 1, 1);
+	double B = brute_B (1, 1, 1, 1, 1, 1);
+	double C = brute_C (1, 1, 1, 1, 1, 1);
+	double result1 = A*cos(w*t)+B*sin(w*t);
+	double result2 = 0;
+	for (int n = 1; n < N; ++n){
+		result2 = C*pow(M_E, -(n*w*t)) + D;
+	}
+	return result1 + result2;
+}
+
 /* @author Weverson, Iago
  * vetor Z da distancia
  */
-double dZ(double H, double w, double t, double G, int N, int gama) {
+double dZ(double w, double t, int gama) {
+	double H = brute_H (1, 1, 1, 1);
+	double G = brute_G (1, 1, 1, 1, 1, 1);
 	double result1 = H * cos(w * t) + I * sin(w * t);
 	double result2 = G;
 	for (int n = 1; n <= N; n++) {
@@ -382,7 +396,7 @@ double dZ(double H, double w, double t, double G, int N, int gama) {
 }
 
 double rT() {
-	return sqrt(pow(dX,2) + pow(dY,2) + pow(dZ,2));
+	return sqrt(pow(dX(1, 1, 1),2) + pow(dY(1, 1),2) + pow(dZ(1, 1, 1),2));
 }
 
 /* @author Weverson, Jhone, Gledson
@@ -423,13 +437,4 @@ double vZ(double H, double w, double t, double I, double J, int N, int gama) {
 	}
 
 	return result1 + result2 + result3;
-}
-
-double dY (double A, double B, double C, double D, double Y, int N, double w, double t) {
-	double result1 = A*cos(w*t)+B*sin(w*t);
-	double result2 = 0;
-	for (int n = 1; n < N; ++n){
-		result2 = C*pow(M_E, -(n*w*t)) + D;
-	}
-	return result1 + result2;
 }
