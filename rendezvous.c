@@ -2,15 +2,15 @@
 #include <math.h>
 
 //-------------------Functions-------------------
-double vX(double A, double w, double t, double B, double E, double F, int N, int gama);
-double vY(double H, double w, double t, double I, double J, int N, int gama);
-double vZ(double H, double w, double t, double I, double J, int N, int gama);
+double vX(double w, double t, int gama);
+double vY(double w, double t, int gama);
+double vZ(double w, double t, int gama);
 double A, B, C, D, E, F, G, H, I, J;
 
 static int const N = 20;
 
 void main() {
-	printf("Resultado: %f", vY(10, 5, 2, 1, 1, 20, 1));
+	printf("Resultado: %f", vY(1, 1, 1));
 }
 
 /**
@@ -34,7 +34,7 @@ void main() {
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de A
 * @returns O coeficiênte A dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_A (int N, double y0, double xl0, double gama, double X, double w, double vex, double vey) {
+double brute_A (double y0, double xl0, double gama, double X, double w, double vex, double vey) {
     double result = 0;
     int n;
     double aux;
@@ -158,7 +158,7 @@ double brute_C (int n, double gama, double X, double w, double vex, double vey) 
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de D
 * @returns O coeficiênte D dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_D (int N, double y0, double xl0, double Y, double X, double w, double vex) {
+double brute_D (double y0, double xl0, double Y, double X, double w, double vex) {
     double result = 0;
 
     result -= (vex* log((X+1)/X))/w;
@@ -189,7 +189,7 @@ double brute_D (int N, double y0, double xl0, double Y, double X, double w, doub
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de E
 * @returns O coeficiênte E dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_E (int N, double y0, double xl0, double X, double w, double vex) {
+double brute_E (double y0, double xl0, double X, double w, double vex) {
     double result = 0;
 
     result -=  3*vex*log((X+1)/X);
@@ -310,7 +310,7 @@ double brute_H (double z0, double Y, double w, double vex) {
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de I
 * @returns o coeficiênte I dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_I (int N, double zl0, double Y, double X, double w, double vez) {
+double brute_I(double zl0, double Y, double X, double w, double vez) {
     double result = 0;
     double sum = 0;
     int n;
@@ -342,7 +342,7 @@ double brute_I (int N, double zl0, double Y, double X, double w, double vez) {
 * @param vez Variável física da Velocidade de exaustão no eixo Z a ser calculado o valor de Jn
 * @returns o somatório coeficiênte Jn dado os valores iniciais e as variáveis físicas a serem testadas
 */
-double brute_J(double Y, double X, double w, double vez, int n){
+double brute_J(double Y, double X, double w, double vez, int n) {
     double result = 0;
 
     result = vez/(n*pow(X,n)*w)/(1+pow((n*Y)/w,2));
@@ -358,8 +358,8 @@ double brute_J(double Y, double X, double w, double vez, int n){
  * vetor X da distancia
  */
 double dX(double w, double t, int gama) {
-	double A = brute_A (1, 1, 1, 1, 1, 1, 1, 1);
-	double E = brute_E (1, 1, 1, 1, 1, 1);
+	double A = brute_A (1, 1, 1, 1, 1, 1, 1);
+	double E = brute_E (1, 1, 1, 1, 1);
 	double F = brute_F(1, 1, 1, 1, 1, 1);
 	double result1 = 2 * (A * sin(w * t) - cos(w * t)) + E * t;
 	double result2 = G;
@@ -370,7 +370,7 @@ double dX(double w, double t, int gama) {
 }
 
 double dY (double w, double t) {
-	double A = brute_A (1, 1, 1, 1, 1, 1, 1, 1);
+	double A = brute_A (1, 1, 1, 1, 1, 1, 1);
 	double B = brute_B (1, 1, 1, 1, 1, 1);
 	double C = brute_C (1, 1, 1, 1, 1, 1);
 	double result1 = A*cos(w*t)+B*sin(w*t);
@@ -385,8 +385,8 @@ double dY (double w, double t) {
  * vetor Z da distancia
  */
 double dZ(double w, double t, int gama) {
-	double H = brute_H (1, 1, 1, 1);
 	double G = brute_G (1, 1, 1, 1, 1, 1);
+	double H = brute_H (1, 1, 1, 1);
 	double result1 = H * cos(w * t) + I * sin(w * t);
 	double result2 = G;
 	for (int n = 1; n <= N; n++) {
@@ -395,14 +395,14 @@ double dZ(double w, double t, int gama) {
 	return result1 - result2;
 }
 
-double rT() {
-	return sqrt(pow(dX(1, 1, 1),2) + pow(dY(1, 1),2) + pow(dZ(1, 1, 1),2));
-}
-
 /* @author Weverson, Jhone, Gledson
  * vetor X da velocidade
  */
-double vX(double A, double w, double t, double B, double E, double F, int N, int gama) {
+double vX(double w, double t, int gama) {
+	double A = brute_A (1, 1, 1, 1, 1, 1, 1);
+	double B = brute_B (1, 1, 1, 1, 1, 1);
+	double E = brute_E (1, 1, 1, 1, 1);
+	double F = brute_F(1, 1, 1, 1, 1, 1);
 	double result1 = 2 * ( (A * w * cos(w * t)) + (B * w * sin(w * t)) ) + E;
 	double result2 = 0;
 	for (int n = 1; n <= N; n++) {
@@ -414,7 +414,10 @@ double vX(double A, double w, double t, double B, double E, double F, int N, int
 /* @author Weverson, Jhone, Gledson
  * vetor Y da velocidade
  */
-double vY(double A, double w, double t, double B, double C, int N, int gama) {
+double vY(double w, double t, int gama) {
+	double A = brute_A (1, 1, 1, 1, 1, 1, 1);
+	double B = brute_B (1, 1, 1, 1, 1, 1);
+	double C = brute_C (1, 1, 1, 1, 1, 1);
 	double result1 = (-A) * w * sin(w * t);
 	double result2 = B * w * cos(w * t);
 	double result3 = 0;
@@ -427,7 +430,10 @@ double vY(double A, double w, double t, double B, double C, int N, int gama) {
 /* @author Weverson
  * vetor Z da velocidade
  */
-double vZ(double H, double w, double t, double I, double J, int N, int gama) {
+double vZ(double w, double t, int gama) {
+	double H = brute_H (1, 1, 1, 1);
+	double I = brute_I (1, 1, 1, 1, 1);
+	double J = brute_J(1, 1, 1, 1, 1);
 	double result1 = (-H) * w * sin(w * t);
 	double result2 = I * w * cos(w * t);
 	double result3 = 0;
@@ -437,4 +443,18 @@ double vZ(double H, double w, double t, double I, double J, int N, int gama) {
 	}
 
 	return result1 + result2 + result3;
+}
+
+/* @author Weverson
+ * Velocidade
+ */
+double rT() {
+	return sqrt(pow(dX(1, 1, 1),2) + pow(dY(1, 1),2) + pow(dZ(1, 1, 1),2));
+}
+
+/* @author Weverson
+ * Posicao
+ */
+double vT() {
+	return sqrt(pow(vX(1, 1, 1),2) + pow(vY(1, 1, 1),2) + pow(vZ(1, 1, 1),2));
 }
