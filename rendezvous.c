@@ -25,52 +25,71 @@ double brute_I(double zl0, double Y, double X, double w, double vez);
 double brute_J(double Y, double X, double w, double vez, int n);
 
 double A, B, C, D, E, F, G, H, I, J, r, v;
-double x=0, y, z=0, xl0=0, yl0=0, zl0=0, X=0, Y=0, vex=0, vey=0, vez=0, w=0, n=0, gama=0, Ve=0;
+double x=0, y=0, z=0, xl0=0, yl0=0, zl0=0, X=0, Y=0, vex=0, vey=0, vez=0, w=0, n=0, gama=0, Ve=0;
 
 static int const N = 20;
 
 /* @author Gledson
  * main
  */
-void main() {
+void main(int argc, double *argv[]) {
 	
 	int Alt= 220;
 	int deltaT = 1;
 	int Tmax = 86400, t;
 	w = 398600.4418/sqrt((6378.0 + Alt*Alt*Alt));
 	int gama = 0;
+	int NPI = 5; // numero de posicoes iniciais
+	FILE *arq;
+	char url[] = "in.dat";
+	arq = fopen(url, "r");
+	double var1;
+
+//	printf("Numero de posicoes iniciais: %s\n", (int) argv[1]);
 	
-	for(t = 0; t <= Tmax; t++) {
-		for(Y = 10^(-14); Y<=10^2; Y++){
-			for(X=1; X<=100; X++) {
-				for(Ve = 0.5; Ve<=5.0; Ve=Ve+0.5 ) {
-					
-					A = brute_A ( y, xl0, gama, X, w, vex, vey);
-					B = brute_B ( yl0, gama, X, w, vex, vey);
-					C = brute_C ( n, gama, X, w, vex,  vey);
-					D = brute_D ( y, xl0,  Y, X, w, vex);
-					E = brute_E ( y, xl0, X, w, vex);
-					F = brute_F( Y, X, w, n, vex, vey);
-					G = brute_G ( x, yl0, X, w, vex, vey);
-					H = brute_H ( z, Y, w, vex);
-					I = brute_I( zl0, Y, X, w, vez);
-					J = brute_J( Y, X, w, vez, n);
-					
-					double fx = dX(w, t, gama);
-					double fy = dY(w, t);
-					double fz = dZ(w, t, gama);
-		
-					double fdx =  vX( w, t, gama);
-					double fdy =  vY( w, t, gama);
-					double fdz =  vZ( w, t, gama);
-					
-					r = rT(fx, fy, fz);
-					v = vT( fdx, fdy, fdz);
-					
-					printf("Resultado: %d", r);
+	for(t = 0; t <= NPI; t++) {
+		if(arq == NULL) {
+			printf("Erro, nao foi possivel abrir o arquivo\n");
+		} else {
+			fscanf(arq,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", &var1, &var1, &var1, &x, &y, &z, &var1, &xl0, &yl0, &zl0, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1);
+			printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
+		}
+
+		for(t = 0; t <= Tmax; t++) {
+			for(Y = 10^(-14); Y<=10^2; Y++){
+				for(X=1; X<=100; X++) {
+					for(Ve = 0.5; Ve<=5.0; Ve=Ve+0.5 ) {
+						vex = Ve*Ve/3;
+						vey = Ve*Ve/3;
+						vez = Ve*Ve/3;
+
+						A = brute_A ( y, xl0, gama, X, w, vex, vey);
+						B = brute_B ( yl0, gama, X, w, vex, vey);
+						C = brute_C ( n, gama, X, w, vex,  vey);
+						D = brute_D ( y, xl0,  Y, X, w, vex);
+						E = brute_E ( y, xl0, X, w, vex);
+						F = brute_F( Y, X, w, n, vex, vey);
+						G = brute_G ( x, yl0, X, w, vex, vey);
+						H = brute_H ( z, Y, w, vex);
+						I = brute_I( zl0, Y, X, w, vez);
+						J = brute_J( Y, X, w, vez, n);
+						
+						double fx = dX(w, t, gama);
+						double fy = dY(w, t);
+						double fz = dZ(w, t, gama);
+			
+						double fdx =  vX( w, t, gama);
+						double fdy =  vY( w, t, gama);
+						double fdz =  vZ( w, t, gama);
+						
+						r = rT(fx, fy, fz);
+						v = vT( fdx, fdy, fdz);
+						
+						//printf("Resultado: %d\n", r);
+					}
 				}
-			}
-		}	
+			}	
+		}
 	}
 }
 
