@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 //-------------------Functions-------------------
@@ -32,20 +33,20 @@ static int const N = 20;
 /* @author Gledson
  * main
  */
-void main(int argc, double *argv[]) {
+void main(int argc, char *argv[]) {
 	
 	int Alt= 220;
 	int deltaT = 1;
 	int Tmax = 86400, t;
 	w = 398600.4418/sqrt((6378.0 + Alt*Alt*Alt));
 	int gama = 0;
-	int NPI = 5; // numero de posicoes iniciais
+	int NPI = atoi(argv[1]); // numero de posicoes iniciais
 	FILE *arq;
 	char url[] = "in.dat";
 	arq = fopen(url, "r");
 	double var1;
 
-//	printf("Numero de posicoes iniciais: %s\n", (int) argv[1]);
+	printf("Numero de posicoes iniciais: %d\n", NPI);
 	
 	for(t = 0; t <= NPI; t++) {
 		if(arq == NULL) {
