@@ -35,11 +35,11 @@ static int const N = 20;
  * main
  */
 void main(int argc, char *argv[]) {
-	
+
 	int Alt= 220;
 	int deltaT = 1;
 	int Tmax = 86400, t;
-	w = 398600.4418/sqrt((6378.0 + Alt*Alt*Alt));
+	w = 398600.4418/sqrt((6378.0 + Alt)*(6378.0 + Alt)*(6378.0 + Alt));
 	int gama = 0;
 	int NPI = atoi(argv[1]); // numero de posicoes iniciais
 	FILE *arq;
@@ -48,7 +48,7 @@ void main(int argc, char *argv[]) {
 	double var1;
 
 	printf("Numero de posicoes iniciais: %d\n", NPI);
-	
+
 	for(t = 0; t <= NPI; t++) {
 		if(arq == NULL) {
 			printf("Erro, nao foi possivel abrir o arquivo\n");
@@ -57,7 +57,7 @@ void main(int argc, char *argv[]) {
 			printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
 		}
 
-		
+
 		for(Ve = 0.5; Ve<=5.0; Ve=Ve+0.5 ) {
 
 			vex = vey = vez =Ve*Ve/3;
@@ -81,23 +81,23 @@ void main(int argc, char *argv[]) {
 					J = brute_J (Y, X, w, vez, n);
 
 					for(t = 0; t <= Tmax; t++) {
-						
+
 						double fx = dX(w, t, gama);
 						double fy = dY(w, t);
 						double fz = dZ(w, t, gama);
-						
+
 						r = rT(fx, fy, fz);
 
 						if(r == 0) {
 							double fdx =  vX( w, t, gama);
 							double fdy =  vY( w, t, gama);
 							double fdz =  vZ( w, t, gama);
-						
+
 							v = vT( fdx, fdy, fdz);
 						}
 					}
 				}
-			}	
+			}
 		}
 	}
 }
@@ -458,7 +458,7 @@ double dX(double w, double t, int gama) {
 }
 
 double dY (double w, double t) {
-	
+
 	double result1 = A*cos(w*t)+B*sin(w*t);
 	double result2 = 0;
 	int n;
@@ -486,7 +486,7 @@ double dZ(double w, double t, int gama) {
  * vetor X da velocidade
  */
 double vX(double w, double t, int gama) {
-	
+
 	double result1 = 2 * ( (A * w * cos(w * t)) + (B * w * sin(w * t)) ) + E;
 	double result2 = 0;
 	int n;
@@ -500,7 +500,7 @@ double vX(double w, double t, int gama) {
  * vetor Y da velocidade
  */
 double vY(double w, double t, int gama) {
-	
+
 	double result1 = (-A) * w * sin(w * t);
 	double result2 = B * w * cos(w * t);
 	double result3 = 0;
@@ -515,12 +515,12 @@ double vY(double w, double t, int gama) {
  * vetor Z da velocidade
  */
 double vZ(double w, double t, int gama) {
-	
+
 	double result1 = (-H) * w * sin(w * t);
 	double result2 = I * w * cos(w * t);
 	double result3 = 0;
 	int n;
-	
+
 	for (n = 1; n <= N; n++) {
 		result3 += J * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
