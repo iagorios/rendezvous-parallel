@@ -3,16 +3,16 @@
 #include <math.h>
 
 //-------------------Functions-------------------
-double vX(double w, double t, int gama);
-double vY(double w, double t, int gama);
-double vZ(double w, double t, int gama);
+double vX(double t);
+double vY(double t);
+double vZ(double t);
 
 double rT(double X, double Y, double Z);
 double vT(double dx, double dy, double dz);
 
-double dX(double w, double t, int gama);
-double dY(double w, double t);
-double dZ(double w, double t, int gama);
+double dX(double t);
+double dY(double t);
+double dZ(double t);
 
 double brute_A (double y0, double xl0, double gama, double X, double w, double vex, double vey);
 double brute_B (double yl0, double gama, double X, double w, double vex, double vey);
@@ -34,7 +34,7 @@ static int const N = 20;
  * main
  */
 void main(int argc, char *argv[]) {
-	
+
 	int Alt= 220;
 	int deltaT = 1;
 	int Tmax = 86400, t;
@@ -47,7 +47,7 @@ void main(int argc, char *argv[]) {
 	double var1;
 
 	printf("Numero de posicoes iniciais: %d\n", NPI);
-	
+
 	for(t = 0; t <= NPI; t++) {
 		if(arq == NULL) {
 			printf("Erro, nao foi possivel abrir o arquivo\n");
@@ -74,22 +74,22 @@ void main(int argc, char *argv[]) {
 						H = brute_H ( z, Y, w, vex);
 						I = brute_I( zl0, Y, X, w, vez);
 						J = brute_J( Y, X, w, vez, n);
-						
-						double fx = dX(w, t, gama);
-						double fy = dY(w, t);
-						double fz = dZ(w, t, gama);
-			
-						double fdx =  vX( w, t, gama);
-						double fdy =  vY( w, t, gama);
-						double fdz =  vZ( w, t, gama);
-						
+
+						double fx = dX(t);
+						double fy = dY(t);
+						double fz = dZ(t);
+
+						double fdx =  vX(t);
+						double fdy =  vY(t);
+						double fdz =  vZ(t);
+
 						r = rT(fx, fy, fz);
 						v = vT( fdx, fdy, fdz);
-						
+
 						//printf("Resultado: %d\n", r);
 					}
 				}
-			}	
+			}
 		}
 	}
 }
@@ -437,84 +437,165 @@ double brute_J(double Y, double X, double w, double vez, int n) {
 
 /* @author Weverson, Iago
  * vetor X da distancia
+ * @modified by Filipe, Iago e João
+ * F agora é calculado dentro desta função
  */
-double dX(double w, double t, int gama) {
-
+double dX(double t) {
+	double resultFn = 0;
 	double result1 = 2 * (A * sin(w * t) - cos(w * t)) + E * t;
 	double result2 = G;
 	int n;
+
 	for ( n = 1; n <= N; n++) {
-		result2 += F * M_E * pow(M_E, -(n * gama * t));
+		// brute_F
+		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*Y))/((1+pow((n*Y)/w,2)));
+
+		if (n%2 == 0) {
+        resultFn = - resultFn;
+    }
+
+		resultFn -= vex/(n*Y);
+		//brute_F
+
+		result2 += resultFn * M_E * pow(M_E, -(n * gama * t));
 	}
+
 	return result1 + result2;
 }
-
-double dY (double w, double t) {
-	
+/*
+ * @modified by Filipe, Iago e João
+ * C agora é calculado dentro desta função
+*/
+double dY(double t) {
+	double resultCn = 0;
+	double aux;
 	double result1 = A*cos(w*t)+B*sin(w*t);
 	double result2 = 0;
 	int n;
+
 	for (n = 1; n < N; ++n){
-		result2 = C*pow(M_E, -(n*w*t)) + D;
+		//brute_C
+		aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
+
+		if (n%2 == 0) {
+        aux = -aux;
+    }
+
+    resultCn+=aux;
+		//brute_C
+
+		result2 = resultCn*pow(M_E, -(n*w*t)) + D;
 	}
+
 	return result1 + result2;
 }
 
 /* @author Weverson, Iago
  * vetor Z da distancia
+ * @modified by Filipe, Iago e João
+ * J agora é calculado dentro desta função
  */
-double dZ(double w, double t, int gama) {
-
+double dZ(double t) {
+	double resultJn = 0;
 	double result1 = H * cos(w * t) + I * sin(w * t);
 	double result2 = G;
 	int n;
+
 	for (n = 1; n <= N; n++) {
-		result2 += J * M_E * pow(M_E, -(n * gama * t));
+		//brute_J
+		resultJn = vez/(n*pow(X,n)*w)/(1+pow((n*Y)/w,2));
+
+		if (n%2 == 0) {
+        resultJn = -resultJn;
+    }
+		//brute_J
+
+		result2 += resultJn * M_E * pow(M_E, -(n * gama * t));
 	}
+
 	return result1 - result2;
 }
 
 /* @author Weverson, Jhone, Gledson
  * vetor X da velocidade
+ * @modified by Filipe, Iago e João
+ * F agora é calculado dentro desta função
  */
-double vX(double w, double t, int gama) {
-	
+double vX(double t) {
+	double resultFn = 0;
 	double result1 = 2 * ( (A * w * cos(w * t)) + (B * w * sin(w * t)) ) + E;
 	double result2 = 0;
 	int n;
+
 	for (n = 1; n <= N; n++) {
-		result2 += F * ((-n) * gama * pow(M_E, -(n * gama * t)));
+		// brute_F
+		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*Y))/((1+pow((n*Y)/w,2)));
+
+		if (n%2 == 0) {
+        resultFn = - resultFn;
+    }
+
+		resultFn -= vex/(n*Y);
+		//brute_F
+
+		result2 += resultFn * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
+
 	return result1 + result2;
 }
 
 /* @author Weverson, Jhone, Gledson
  * vetor Y da velocidade
+ * @modified by Filipe, Iago e João
+ * C agora é calculado dentro desta função
  */
-double vY(double w, double t, int gama) {
-	
+double vY(double t) {
+	double resultCn = 0;
+	double aux;
 	double result1 = (-A) * w * sin(w * t);
 	double result2 = B * w * cos(w * t);
 	double result3 = 0;
 	int n;
+
 	for (n = 1; n <= N; n++) {
-		result3 += C * ((-n) * gama * pow(M_E, -(n * gama * t)));
+		//brute_C
+		aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
+
+		if (n%2 == 0) {
+        aux = -aux;
+    }
+
+    resultCn+=aux;
+		//brute_C
+
+		result3 += resultCn * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
+
 	return result1 + result2 + result3;
 }
 
 /* @author Weverson
  * vetor Z da velocidade
+ * @modified by Filipe, Iago e João
+ * J agora é calculado dentro desta função
  */
-double vZ(double w, double t, int gama) {
-	
+double vZ(double t) {
+	double resultJn = 0;
 	double result1 = (-H) * w * sin(w * t);
 	double result2 = I * w * cos(w * t);
 	double result3 = 0;
 	int n;
-	
+
 	for (n = 1; n <= N; n++) {
-		result3 += J * ((-n) * gama * pow(M_E, -(n * gama * t)));
+		//brute_J
+		resultJn = vez/(n*pow(X,n)*w)/(1+pow((n*Y)/w,2));
+
+		if (n%2 == 0) {
+        resultJn = -resultJn;
+    }
+		//brute_J
+
+		result3 += resultJn * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
 
 	return result1 + result2 + result3;
