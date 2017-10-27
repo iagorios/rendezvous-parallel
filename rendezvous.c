@@ -56,37 +56,41 @@ void main(int argc, char *argv[]) {
 			printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
 		}
 
-		for(t = 0; t <= Tmax; t++) {
-			for(Y = 10^(-14); Y<=10^2; Y++){
-				for(X=1; X<=100; X++) {
-					for(Ve = 0.5; Ve<=5.0; Ve=Ve+0.5 ) {
-						vex = Ve*Ve/3;
-						vey = Ve*Ve/3;
-						vez = Ve*Ve/3;
+		for(Ve = 0.5; Ve<=5.0; Ve=Ve+0.5 ) {
 
-						A = brute_A ( y, xl0, gama, X, w, vex, vey);
-						B = brute_B ( yl0, gama, X, w, vex, vey);
-						C = brute_C ( n, gama, X, w, vex,  vey);
-						D = brute_D ( y, xl0,  Y, X, w, vex);
-						E = brute_E ( y, xl0, X, w, vex);
-						F = brute_F( Y, X, w, n, vex, vey);
-						G = brute_G ( x, yl0, X, w, vex, vey);
-						H = brute_H ( z, Y, w, vex);
-						I = brute_I( zl0, Y, X, w, vez);
-						J = brute_J( Y, X, w, vez, n);
+			vex = vey = vez =Ve*Ve/3;
+			int aux = -14;
+			for(aux = -14; aux<=2; aux++){
+				Y = pow(10, aux);
+				
+				for(X=1; X<=100; X++) {
+
+					A = brute_A (y, xl0, gama, X, w, vex, vey);
+					B = brute_B (yl0, gama, X, w, vex, vey);
+					C = brute_C (n, gama, X, w, vex, vey);
+					D = brute_D (y, xl0, Y, X, w, vex);
+					E = brute_E (y, xl0, X, w, vex);
+					F = brute_F (Y, X, w, n, vex, vey);
+					G = brute_G (x, yl0, X, w, vex, vey);
+					H = brute_H (z, Y, w, vex);
+					I = brute_I (zl0, Y, X, w, vez);
+					J = brute_J (Y, X, w, vez, n);
+
+					for(t = 0; t <= Tmax; t++) {
 
 						double fx = dX(t);
 						double fy = dY(t);
 						double fz = dZ(t);
 
-						double fdx =  vX(t);
-						double fdy =  vY(t);
-						double fdz =  vZ(t);
-
 						r = rT(fx, fy, fz);
-						v = vT( fdx, fdy, fdz);
 
-						//printf("Resultado: %d\n", r);
+						if(r == 0) {
+							double fdx=  vX(t);
+							double fdy=  vY(t);
+							double fdz=  vZ(t);
+
+							v = vT( fdx, fdy, fdz);
+						}
 					}
 				}
 			}
