@@ -38,7 +38,7 @@ void main(int argc, char *argv[]) {
 	int Alt= 220;
 	int deltaT = 1;
 	int Tmax = 86400, t;
-	w = 398600.4418/sqrt((6378.0 + Alt*Alt*Alt));
+	w = 398600.4418/sqrt((6378.0 + Alt)*(6378.0 + Alt)*(6378.0 + Alt));
 	int gama = 0;
 	int NPI = atoi(argv[1]); // numero de posicoes iniciais
 	FILE *arq;
