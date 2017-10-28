@@ -62,12 +62,15 @@ void main(int argc, char *argv[]) {
 			int aux = -14;
 
 			for(aux = 1; aux<=1; aux++){
-				Y = pow(10, aux);
+				Y= pow(10, aux);
+				gama= Y; //gama sendo setada para evitar duplicatas
 
 				for(X=1; X<=1; X++) {
 
-					A = brute_A (y, xl0, gama, X, w, vex, vey);
-					B = brute_B (yl0, gama, X, w, vex, vey);
+					//printf("PARAMETROS DE B: %lf %lf %lf %lf %lf %lf\n", y, xl0, Y, X, w, vex, vey);
+
+					A = brute_A (y, xl0, Y, X, w, vex, vey); //modificado por Iago: gama substituido por Y
+					B = brute_B (yl0, Y, X, w, vex, vey); //modificado por Iago: gama substituido por Y
 					C = brute_C (n, gama, X, w, vex, vey);
 					D = brute_D (y, xl0, Y, X, w, vex);
 					E = brute_E (y, xl0, X, w, vex);
@@ -77,7 +80,7 @@ void main(int argc, char *argv[]) {
 					I = brute_I (zl0, Y, X, w, vez);
 					J = brute_J (Y, X, w, vez, n);
 
-					printf("\nA:%lf B:%lf C:%lf D:%lf E:%lf F:%lf G:%lf H:%lf I:%lf J:%lf\n\n", A, B, C, D, E, F, G, H, I, J);
+					printf("\nA:%lf B:%lf C:%lf D:%lf E:%lf F:%lf G:%lf H:%lf I:%lf J:%lf\n", A, B, C, D, E, F, G, H, I, J);
 
 					for(t = 1; t <= 1; t++) {
 
@@ -451,7 +454,7 @@ double brute_J(double Y, double X, double w, double vez, int n) {
 double dX(double t) {
 	double resultFn = 0;
 	double result1 = 2 * (A * sin(w * t) - cos(w * t)) + E * t;
-	double result2 = G;
+	double result2 = 0; //modificado por Iago: result2 = G trocado por result2 = 0
 	int n;
 
 	for ( n = 1; n <= N; n++) {
@@ -465,10 +468,12 @@ double dX(double t) {
 		resultFn -= vex/(n*Y);
 		//brute_F
 
-		result2 += resultFn * M_E * pow(M_E, -(n * gama * t));
+		result2 += resultFn * pow(M_E, -(n * gama * t));
 	}
 
-	return result1 + result2;
+	printf("\nSomatorio de dX: %lf\n", result2);
+
+	return result1 + result2 + G;
 }
 /*
  * @modified by Filipe, Iago e João
