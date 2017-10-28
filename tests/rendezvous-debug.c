@@ -48,7 +48,7 @@ void main(int argc, char *argv[]) {
 
 	printf("Numero de posicoes iniciais: %d\n", NPI);
 
-	for(t = 0; t <= NPI; t++) {
+	for(int np = 1; np <= NPI; np++) {
 		if(arq == NULL) {
 			printf("Erro, nao foi possivel abrir o arquivo\n");
 		} else {
@@ -76,6 +76,8 @@ void main(int argc, char *argv[]) {
 					H = brute_H (z, Y, w, vex);
 					I = brute_I (zl0, Y, X, w, vez);
 					J = brute_J (Y, X, w, vez, n);
+
+					printf("\nA:%lf B:%lf C:%lf D:%lf E:%lf F:%lf G:%lf H:%lf I:%lf J:%lf\n\n", A, B, C, D, E, F, G, H, I, J);
 
 					for(t = 1; t <= 1; t++) {
 
