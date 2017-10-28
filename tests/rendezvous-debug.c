@@ -31,6 +31,8 @@ double x=0, y=0, z=0, xl0=0, yl0=0, zl0=0, X=0, Y=0, vex=0, vey=0, vez=0, w=0, n
 static int const N = 20;
 
 /* @author Gledson
+ * @modified by Filipe
+ * Removendo a declaração local do gama.
  * main
  */
 void main(int argc, char *argv[]) {
@@ -39,7 +41,7 @@ void main(int argc, char *argv[]) {
 	int deltaT = 1;
 	int Tmax = 86400, t;
 	w = 398600.4418/sqrt((6378.0 + Alt)*(6378.0 + Alt)*(6378.0 + Alt));
-	int gama = 0;
+	//int gama = 0;
 	int NPI = atoi(argv[1]); // numero de posicoes iniciais
 	FILE *arq;
 	char url[] = "in.dat";
@@ -80,7 +82,7 @@ void main(int argc, char *argv[]) {
 					I = brute_I (zl0, Y, X, w, vez);
 					J = brute_J (Y, X, w, vez, n);
 
-					printf("\nA:%lf B:%lf C:%lf D:%lf E:%lf F:%lf G:%lf H:%lf I:%lf J:%lf\n", A, B, C, D, E, F, G, H, I, J);
+					printf("\nA:%lf \nB:%lf \nC:%lf \nD:%lf \nE:%lf \nF:%lf \nG:%lf \nH:%lf \nI:%lf \nJ:%lf\n", A, B, C, D, E, F, G, H, I, J);
 
 					for(t = 1; t <= 1; t++) {
 
@@ -462,8 +464,8 @@ double dX(double t) {
 		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*Y))/((1+pow((n*Y)/w,2)));
 
 		if (n%2 == 0) {
-        resultFn = - resultFn;
-    }
+        	resultFn = - resultFn;
+    	}
 
 		resultFn -= vex/(n*Y);
 		//brute_F
@@ -472,12 +474,14 @@ double dX(double t) {
 	}
 
 	printf("\nSomatorio de dX: %lf\n", result2);
+	printf("Saida de dX: %lf\n", (result1 + result2 + G));
 
 	return result1 + result2 + G;
 }
 /*
  * @modified by Filipe, Iago e João
  * C agora é calculado dentro desta função
+ * Corrigindo o calculo do Cn
 */
 double dY(double t) {
 	double resultCn = 0;
@@ -486,21 +490,25 @@ double dY(double t) {
 	double result2 = 0;
 	int n;
 
-	for (n = 1; n < N; ++n){
+	for (n = 1; n <= N; ++n){
 		//brute_C
 		aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
 
 		if (n%2 == 0) {
-        aux = -aux;
-    }
+        	aux = -aux;
+    	}
 
-    resultCn+=aux;
+    	resultCn = aux; // Modificação: tirando o +=
 		//brute_C
+		printf("C%d: %lf\n", n, resultCn);
 
-		result2 = resultCn*pow(M_E, -(n*w*t)) + D;
+		result2 += resultCn*pow(M_E, -(n*w*t)); // modificação: substituindo = por +=
 	}
 
-	return result1 + result2;
+	// printf("Cn - parametros\nX: %lf\nVex: %lf\ngama: %lf \nVey: %lf\nw: %lf",
+	// 	X, vex, gama, vey, w);
+
+	return result1 + result2 + D; // modificação: somando D fora do for
 }
 
 /* @author Weverson, Iago
