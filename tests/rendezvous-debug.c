@@ -97,6 +97,7 @@ void main(int argc, char *argv[]) {
 						v = vT( fdx, fdy, fdz);
 
 						printf("xt: %lf yt: %lf zt:%lf\n", fx, fy, fz);
+
 						printf("R: %lf V:%lf\n", r,v);
 					}
 				}
@@ -219,8 +220,9 @@ double brute_C (int n, double gama, double X, double w, double vex, double vey) 
     double aux;
 
     //Calculo do somatorio Cn
-    aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
-    if (n%2 == 0) {
+    aux = 1/(n*pow(X, n)) * (vex + ((n * gama * vey)/(w*w))) * (1/(1 + ((n*gama/w)*(n*gama/w)) )); //modificado por Iago: inseri parenteses
+
+		if (n%2 == 0) {
         aux = -aux;
     }
 
@@ -468,8 +470,10 @@ double dX(double t) {
 		resultFn -= vex/(n*Y);
 		//brute_F
 
-		result2 += resultFn * pow(M_E, -(n * gama * t));
+		result2 += resultFn * pow(M_E, -(n * gama * t)); //modificado por Iago: removida a multiplicação pelo M_E
 	}
+
+	printf("\nResult de F: %lf\n", resultFn);
 
 	printf("\nSomatorio de dX: %lf\n", result2);
 
@@ -486,7 +490,7 @@ double dY(double t) {
 	double result2 = 0;
 	int n;
 
-	for (n = 1; n < N; ++n){
+	for (n = 1; n <= N; ++n){ //modificado por Iago: n < N trocado por n <= N
 		//brute_C
 		aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
 
@@ -498,6 +502,8 @@ double dY(double t) {
 		//brute_C
 
 		result2 = resultCn*pow(M_E, -(n*w*t)) + D;
+
+		printf("\nResult de C%d: %lf\n", n,resultCn);
 	}
 
 	return result1 + result2;
@@ -525,6 +531,8 @@ double dZ(double t) {
 
 		result2 += resultJn * M_E * pow(M_E, -(n * gama * t));
 	}
+
+	printf("\nResult de J: %lf\n", resultJn);
 
 	return result1 - result2;
 }
