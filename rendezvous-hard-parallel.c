@@ -17,14 +17,11 @@ double dZ(int t, double X, double Y, double vez, double G, double H, double I);
 
 double brute_A (double y0, double xl0, double X, double vex, double vey);
 double brute_B (double yl0, double X, double vex, double vey);
-double brute_C (int n, double X, double vex, double vey);
 double brute_D (double y0, double xl0, double Y, double X, double vex);
 double brute_E (double y0, double xl0, double X, double vex);
-double brute_F(double Y, double X, int n, double vex, double vey);
 double brute_G (double x0, double yl0, double X, double vex, double vey);
 double brute_H (double z0, double Y, double vex);
 double brute_I(double zl0, double Y, double X, double vez);
-double brute_J(double Y, double X, double vez, int n);
 
 double x=0, y=0, z=0, xl0=0, yl0=0, zl0=0;
 double gama, w;
