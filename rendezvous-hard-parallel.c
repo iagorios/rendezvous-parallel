@@ -54,7 +54,8 @@ void main(int argc, char *argv[]) {
 		}
 		#pragma omp parallel for
 		for(int VeAux = 1; VeAux<=10; VeAux++) {
-            double Ve = VeAux/2; //------------------------- errado, arrumar uma solucao pra isso
+			double Ve =VeAux;
+            Ve = Ve/2;
             int vex, vey, vez;
             vex = vey = vez =Ve*Ve/3;
             #pragma omp parallel for 
