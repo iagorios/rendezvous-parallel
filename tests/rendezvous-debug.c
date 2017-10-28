@@ -98,8 +98,8 @@ void main(int argc, char *argv[]) {
 
 						v = vT( fdx, fdy, fdz);
 
+						printf("\n ======== Saídas Finais ========\n");
 						printf("xt: %lf yt: %lf zt:%lf\n", fx, fy, fz);
-
 						printf("R: %lf V:%lf\n", r,v);
 					}
 				}
@@ -461,6 +461,8 @@ double dX(double t) {
 	double result2 = 0; //modificado por Iago: result2 = G trocado por result2 = 0
 	int n;
 
+	printf("\n ======== Função dX ========\n");
+
 	for ( n = 1; n <= N; n++) {
 		// brute_F
 		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*Y))/((1+pow((n*Y)/w,2)));
@@ -472,13 +474,10 @@ double dX(double t) {
 		resultFn -= vex/(n*Y);
 		//brute_F
 
+		printf("F%d: %lf\n", n, resultFn);
+
 		result2 += resultFn * pow(M_E, -(n * gama * t)); //modificado por Iago: removida a multiplicação pelo M_E
 	}
-
-	printf("\nResult de F: %lf\n", resultFn);
-
-	printf("\nSomatorio de dX: %lf\n", result2);
-	printf("Saida de dX: %lf\n", (result1 + result2 + G));
 
 	return result1 + result2 + G;
 }
@@ -494,6 +493,7 @@ double dY(double t) {
 	double result2 = 0;
 	int n;
 
+	printf("\n ======== Função dY ========\n");
 
 	for (n = 1; n <= N; ++n){
 		//brute_C
@@ -528,6 +528,8 @@ double dZ(double t) {
 	double result2 = G;
 	int n;
 
+	printf("\n ======== Função dZ ========\n");
+
 	for (n = 1; n <= N; n++) {
 		//brute_J
 		resultJn = vez/(n*pow(X,n)*w)/(1+pow((n*Y)/w,2));
@@ -537,10 +539,10 @@ double dZ(double t) {
     }
 		//brute_J
 
+		printf("J%d: %lf\n", n, resultJn);
+
 		result2 += resultJn * M_E * pow(M_E, -(n * gama * t));
 	}
-
-	printf("\nResult de J: %lf\n", resultJn);
 
 	return result1 - result2;
 }
