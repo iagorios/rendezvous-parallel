@@ -457,7 +457,7 @@ double brute_J(double Y, double X, double w, double vez, int n) {
  */
 double dX(double t) {
 	double resultFn = 0;
-	double result1 = 2 * (6.027777556 * sin(w * t) - 7.486828242 *cos(w * t)) + E * t; //modificado por Iago: cos(w * t) trocado por B*cos(w * t)
+	double result1 = 2 * (A * sin(w * t) - B *cos(w * t)) + E * t; //modificado por Iago: cos(w * t) trocado por B*cos(w * t)
 	double result2 = 0; //modificado por Iago: result2 = G trocado por result2 = 0
 	int n;
 
@@ -488,14 +488,14 @@ double dX(double t) {
 */
 double dY(double t) {
 	double resultCn = 0;
-	double aux;
-	double result1 = 6.027777556*cos(w*t)+7.486828242*sin(w*t);
+	double aux= 0;
+	double result1 = A*cos(w*t)+B*sin(w*t);
 	double result2 = 0;
 	int n;
 
 	printf("\n ======== Função dY ========\n");
 
-	for (n = 1; n <= N; ++n){
+	for (n = 1; n <= N; n++){ //modificado por Iago: ++n agora é n++
 		//brute_C
 		aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
 
@@ -505,15 +505,12 @@ double dY(double t) {
 
     resultCn = aux; // Modificação: tirando o +=
 		//brute_C
-		
+
 		printf("C%d: %lf\n", n, resultCn);
 
 		result2 += resultCn*pow(M_E, -(n*gama*t)); // modificação: substituindo = por +=
 
 	}
-
-	// printf("Cn - parametros\nX: %lf\nVex: %lf\ngama: %lf \nVey: %lf\nw: %lf",
-	// 	X, vex, gama, vey, w);
 
 	return result1 + result2 + D; // modificação: somando D fora do for
 }
