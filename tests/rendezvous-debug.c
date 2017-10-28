@@ -147,7 +147,7 @@ double brute_A (double y0, double xl0, double gama, double X, double w, double v
         sum += aux;
     }
 
-    result+= sum;
+    result -= sum; // modificado por Filipe: substituindo soma por subtração
 
     return result;
 }
