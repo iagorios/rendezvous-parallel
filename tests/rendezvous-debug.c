@@ -69,7 +69,7 @@ void main(int argc, char *argv[]) {
 
 				for(X=1; X<=1; X++) {
 
-					//printf("PARAMETROS DE B: %lf %lf %lf %lf %lf %lf\n", y, xl0, Y, X, w, vex, vey);
+					//printf("P A: y%lf xl0%lf gama%lf X%lf w%lf vex%lf\n", y, xl0, gama, X, w, vex);
 
 					A = brute_A (y, xl0, Y, X, w, vex, vey); //modificado por Iago: gama substituido por Y
 					B = brute_B (yl0, Y, X, w, vex, vey); //modificado por Iago: gama substituido por Y

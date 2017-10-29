@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <omp.h>
+//#include <omp.h>
 
 //-------------------Functions-------------------
 double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E);
@@ -11,7 +11,7 @@ double vZ(int t, double X, double gama, double vez, double H, double I);
 double rT(double X, double gama, double Z);
 double vT(double dx, double dy, double dz);
 
-double dX(int t, double vey, double vex, double gama, double X, double A, double E, double G);
+double dX(int t, double vey, double vex, double gama, double X, double A, double B, double E, double G);
 double dY(int t, double vex, double vey, double gama, double X, double A, double B, double D);
 double dZ(int t, double X, double gama, double vez, double G, double H, double I);
 
@@ -24,16 +24,15 @@ double brute_H (double z0, double gama, double vex);
 double brute_I(double zl0, double gama, double X, double vez);
 
 double x=0, y=0, z=0, xl0=0, yl0=0, zl0=0;
-double w;
+int Alt= 220;
+double w = 398600.4418/sqrt((6378.0 + 220)*(6378.0 + 220)*(6378.0 + 220));
 
 static int const N = 20;
 /* @author Gledson
  * main
  */
 void main(int argc, char *argv[]) {
-	int Alt= 220;
-	w = 398600.4418/sqrt((6378.0 + Alt)*(6378.0 + Alt)*(6378.0 + Alt));
-	int deltaT = 1;
+	
 	int Tmax = 86400;	
 	int NPI = atoi(argv[1]); // numero de posicoes iniciais
 	FILE *arq;
@@ -43,26 +42,29 @@ void main(int argc, char *argv[]) {
 
 	printf("Numero de posicoes iniciais: %d\n", NPI);
 
-	for(int np = 0; np <= NPI; np++) {
+	for(int np = 1; np <= NPI; np++) {
 		if(arq == NULL) {
 			printf("Erro, nao foi possivel abrir o arquivo\n");
 		} else {
 			fscanf(arq,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", &var1, &var1, &var1, &x, &y, &z, &var1, &xl0, &yl0, &zl0, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1);
 			printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
 		}
-		#pragma omp parallel for
-		for(int VeAux = 1; VeAux<=10; VeAux++) {
+		//#pragma omp parallel for
+		for(int VeAux = 10; VeAux<=10; VeAux++) {
 			double Ve =VeAux;
             Ve = Ve/2;
-            int vex, vey, vez;
+            double vex, vey, vez;
             vex = vey = vez =Ve*Ve/3;
-            #pragma omp parallel for 
-            for(int aux = -14; aux<=2; aux++){
+            //#pragma omp parallel for 
+            for(int aux = 1; aux<=1; aux++){
 				double gama = pow(10, aux);
 				//int tid = omp_get_thread_num();
         		//printf("Hello world from omp thread %d\n", tid);
-                #pragma omp parallel for firstprivate(z, x, y, zl0, xl0, yl0)
-				for(int X=1; X<=100; X++) {
+                //#pragma omp parallel for firstprivate(z, x, y, zl0, xl0, yl0)
+				for(int Xaux=1; Xaux<=1; Xaux++) {
+					double X = Xaux;
+
+					printf("P A: y%lf xl0%lf gama%lf X%lf w%lf vex%lf", y, xl0, gama, X, w, vex);
 
 					double A = brute_A (y, xl0, gama, X, vex, vey);
 					double B = brute_B (yl0, gama, X, vex, vey);
@@ -72,26 +74,24 @@ void main(int argc, char *argv[]) {
 					double H = brute_H (z, gama, vex);
 					double I = brute_I (zl0, gama, X, vez);
 
-					printf("\nA:%lf B:%lf D:%lf E:%lf G:%lf H:%lf I:%lf \n\n", A, B, D, E, G, H, I);
-                    #pragma omp parallel for 
-					for(int t = 0; t <= Tmax; t++) {
-						double fx = dX(t, vey, vex, gama, X, A, E, G);
+					//printf("\nA:%lf \nB:%lf \nD:%lf \nE:%lf \nG:%lf \nH:%lf \nI:%lf \n", A, B, D, E, G, H, I);
+                    //#pragma omp parallel for 
+					for(int t = 1; t <= 1; t++) {
+						double fx = dX(t, vey, vex, gama, X, A, B, E, G);
                         double fy = dY(t, vex, vey, gama, X, A, B, D);
                         double fz = dZ(t, X, gama, vez, G, H, I);
 
 						double r = rT(fx, fy, fz);
-                        printf("R: %lf\n", r);
+						double v;
 						if(r == 0) {
 							double fdx =  vX(t, X, gama, vex, vey, A, B, E);
                             double fdy =  vY(t, X, gama, vex, vey, A, B);
                             double fdz =  vZ(t, X, gama, vez, H, I);
 
-							double v = vT( fdx, fdy, fdz);
-							
-							printf("\n ======== Saídas Finais ========\n");
-							printf("xt: %lf yt: %lf zt:%lf\n", fx, fy, fz);
-							printf("R: %lf V:%lf\n", r,v);
+							v = vT( fdx, fdy, fdz);	
 						}
+						printf(" ======== Saídas Finais ========\n");
+						printf("R: %lf V:%lf\n", r,v);
 					}
 				}
 			}
@@ -128,7 +128,7 @@ double brute_A (double y0, double xl0, double gama, double X, double vex, double
     result = (2*xl0)/w - 3*y0 +((2*vex)/w)*log((X+1)/X);
 
     //Calculo do somatorio
-    #pragma omp parallel for reduction(+:sum) private(aux)
+    //#pragma omp parallel for reduction(+:sum) private(aux)
     for (int n = 1; n <= N; n++) {
 //		aux = (1/(n*pow(X, n)))*(1/(1+pow(((n*Y)/w),2)))*(((2*vex)/w)+((n*Y*vey)/(w*w)));
 		aux = (1/(n*pow(X, n)))*(1/(1+((n*gama)/w)*((n*gama)/w)))*(((2*vex)/w)+((n*gama*vey)/(w*w)));
@@ -172,7 +172,7 @@ double brute_B (double yl0,  double gama, double X, double vex, double vey) {
     result = yl0/w + (vey/w)*log((X+1)/X);
 
     //Calculo do somatorio
-    #pragma omp parallel for reduction(+:sum) private(aux)
+    //#pragma omp parallel for reduction(+:sum) private(aux)
     for (int n = 1; n <= N; n++) {
 //      aux = (1/(n*pow(X,n)))*(1/(1+pow(((n*Y)/w),2)))*(vey/w + (2*n*Y*vex)/(w*w));
         aux = (1/(n*pow(X,n)))*(1/(1+pow(((n*gama)/w),2)))*(vey/w + (n*gama*vex)/(w*w));
@@ -269,7 +269,7 @@ double brute_G (double x0, double yl0, double X, double vex, double vey) {
 
     result= 2*yl0/w + x0 + (2*vey*(log((X+1)/X)))/w;
 
-    #pragma omp parallel for reduction(+:sum) private(aux)
+    //#pragma omp parallel for reduction(+:sum) private(aux)
 	for (int n = 1; n <= N; n++) {
     	aux = 3*vex/(pow(n,2)*pow(X,n)*w);
 
@@ -312,7 +312,7 @@ double brute_H (double z0, double gama, double vex) {
 
     result = z0;
     //Calculo do somatorio
-    #pragma omp parallel for reduction(+:sum) private(aux)
+    //#pragma omp parallel for reduction(+:sum) private(aux)
     for (int n = 1; n <= N; n++) {
         aux = ((vex*gama)/(pow(gama,n)*(w*w)))/(1+((n*gama)/w)*((n*gama)/w));
         if (n%2 == 0) {
@@ -344,7 +344,7 @@ double brute_I(double zl0, double gama, double X, double vez) {
     result = zl0/w - (vez/w)*(log((X+1)/X));
 
     //Calculo do somatorio
-    #pragma omp parallel for reduction(+:sum) private(aux)
+    //#pragma omp parallel for reduction(+:sum) private(aux)
     for (int n = 1; n <= N; n++) {
         aux = ((vez)/(pow(n,2)*pow(X,n)*w))/(1+pow((n*gama)/w,2));
         if (n%2 == 0) {
@@ -361,13 +361,13 @@ double brute_I(double zl0, double gama, double X, double vez) {
 /* @author Weverson, Iago
  * vetor X da distancia
  */
-double dX(int t, double vey, double vex, double gama, double X, double A, double E, double G) {
+double dX(int t, double vey, double vex, double gama, double X, double A, double B, double E, double G) {
 
 	double resultFn = 0;
 	double result1 = 2 * (A*sin(w*t)-B*cos(w*t))+E*t;
 	double result2 = 0;
 
-	#pragma omp parallel for reduction(+:result2)
+	//#pragma omp parallel for reduction(+:result2)
 	for (int n = 1; n <= N; n++) {
 		// brute_F
 		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*gama))/(1+pow((n*gama)/w,2));
@@ -388,7 +388,7 @@ double dY (int t, double vex, double vey, double gama, double X, double A, doubl
 	double resultCn = 0;
 	double result1 = A*cos(w*t)+B*sin(w*t);
 	double result2 = 0;
-	#pragma omp parallel for reduction(+:result2)
+	//#pragma omp parallel for reduction(+:result2)
 	for (int n = 1; n < N; ++n){
 		//brute_C
 		resultCn = 1/(n*pow(X,n))*(vex+(n*gama*vey)/(w*w))*(1/(1+(n*gama/w)*(n*gama/w)));
@@ -411,7 +411,7 @@ double dZ(int t, double X, double gama, double vez, double G, double H, double I
 	double resultJn = 0;
 	double result1 = H * cos(w * t) + I * sin(w * t);
 	double result2 = 0;
-	#pragma omp parallel for reduction(+:result2)
+	//#pragma omp parallel for reduction(+:result2)
 	for (int n = 1; n <= N; n++) {
 		//brute_J
 		resultJn = vez/(n*pow(X,n)*w)/(1+pow((n*gama)/w,2));
@@ -431,10 +431,10 @@ double dZ(int t, double X, double gama, double vez, double G, double H, double I
 double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E) {	
 
 	double resultFn = 0;
-	double result1 = 2 * ( (A * w * cos(w * t)) + (B * w * sin(w * t)) ) + E;
+	double result1 = 2 * ( (A * w * sin(w * t)) + (B * w * cos(w * t)) ) + E;
 	double result2 = 0;
 
-	#pragma omp parallel for reduction(+:result2)
+	//#pragma omp parallel for reduction(+:result2)
 	for (int n = 1; n <= N; n++) {
 		// brute_F
 		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*gama))/(1+pow((n*gama)/w,2));
@@ -456,20 +456,18 @@ double vX(int t, double X, double gama, double vex, double vey, double A, double
 double vY(int t, double X, double gama, double vex, double vey, double A, double B) {
 
 	double resultCn = 0;
-	double aux;
 	double result1 = (-A) * w * sin(w * t);
 	double result2 = B * w * cos(w * t);
 	double result3 = 0;
 
-	#pragma omp parallel for reduction(+:result3)
+	//#pragma omp parallel for reduction(+:result3)
 	for (int n = 1; n <= N; n++) {
 		//brute_C
-		aux = 1/(n*pow(X, n))*(vex+(n*gama*vey)/(w*w))*(1/(1+(n*gama/w)*(n*gama/w)));
+		resultCn = 1/(n*pow(X, n))*(vex+(n*gama*vey)/(w*w))*(1/(1+(n*gama/w)*(n*gama/w)));
 
 		if (n%2 == 0) {
-	        aux = -aux;
+	        resultCn = -resultCn;
 	    }
-	    resultCn+=aux;
 		//brute_C
 
 		result3 += resultCn * ((-n) * gama * pow(M_E, -(n * gama * t)));
@@ -487,7 +485,7 @@ double vZ(int t, double X, double gama,  double vez, double H, double I) {
 	double result2 = I * w * cos(w * t);
 	double result3 = 0;
 
-	#pragma omp parallel for reduction(+:result3)
+	//#pragma omp parallel for reduction(+:result3)
 	for (int n = 1; n <= N; n++) {
 		//brute_J
 		resultJn = vez/(n*pow(X,n)*w)/(1+pow((n*gama)/w,2));
@@ -499,7 +497,7 @@ double vZ(int t, double X, double gama,  double vez, double H, double I) {
 		result3 += resultJn * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
 
-	return result1 + result2 + result3;
+	return result1 + result2 - result3;
 }
 
 /* @author Weverson
