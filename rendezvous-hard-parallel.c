@@ -87,7 +87,10 @@ void main(int argc, char *argv[]) {
                             double fdz =  vZ(t, X, gama, vez, H, I);
 
 							double v = vT( fdx, fdy, fdz);
-							printf("V: %lf\n", v);
+							
+							printf("\n ======== Saídas Finais ========\n");
+							printf("xt: %lf yt: %lf zt:%lf\n", fx, fy, fz);
+							printf("R: %lf V:%lf\n", r,v);
 						}
 					}
 				}
@@ -135,7 +138,7 @@ double brute_A (double y0, double xl0, double gama, double X, double vex, double
         sum += aux;
     }
 
-    result+= sum;
+    result-= sum;
 
     return result;
 }
@@ -361,13 +364,13 @@ double brute_I(double zl0, double gama, double X, double vez) {
 double dX(int t, double vey, double vex, double gama, double X, double A, double E, double G) {
 
 	double resultFn = 0;
-	double result1 = 2 * (A * sin(w * t) - cos(w * t)) + E * t;
+	double result1 = 2 * (A*sin(w*t)-B*cos(w*t))+E*t;
 	double result2 = 0;
 
 	#pragma omp parallel for reduction(+:result2)
 	for (int n = 1; n <= N; n++) {
 		// brute_F
-		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*gama))/((1+pow((n*gama)/w,2)));
+		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*gama))/(1+pow((n*gama)/w,2));
 
 		if (n%2 == 0) {
             resultFn = - resultFn;
@@ -375,32 +378,29 @@ double dX(int t, double vey, double vex, double gama, double X, double A, double
 		resultFn -= vex/(n*gama);
 		//brute_F
 
-		result2 += resultFn * M_E * pow(M_E, -(n * gama * t));
+		result2 += resultFn * pow(M_E, -(n * gama * t));
 	}
-	result2 += G;
-	return result1 + result2;
+	return result1 + result2 + G;
 }
 
 double dY (int t, double vex, double vey, double gama, double X, double A, double B, double D) {
 
 	double resultCn = 0;
-	double aux;
 	double result1 = A*cos(w*t)+B*sin(w*t);
 	double result2 = 0;
 	#pragma omp parallel for reduction(+:result2)
 	for (int n = 1; n < N; ++n){
 		//brute_C
-		aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
+		resultCn = 1/(n*pow(X,n))*(vex+(n*gama*vey)/(w*w))*(1/(1+(n*gama/w)*(n*gama/w)));
 
 		if (n%2 == 0) {
-	        aux = -aux;
+	        resultCn = -resultCn;
 	    }
-    	resultCn+=aux;
 		//brute_C
 
-		result2 = resultCn*pow(M_E, -(n*w*t)) + D;
+		result2 += resultCn*pow(M_E, -(n*gama*t));
 	}
-	return result1 + result2;
+	return result1 + result2 + D;
 }
 
 /* @author Weverson, Iago
@@ -420,9 +420,8 @@ double dZ(int t, double X, double gama, double vez, double G, double H, double I
 	    }
 		//brute_J
 
-		result2 += resultJn * M_E * pow(M_E, -(n * gama * t));
+		result2 += resultJn * pow(M_E, -(n * gama * t));
 	}
-	result2 += G;
 	return result1 - result2;
 }
 
@@ -438,7 +437,7 @@ double vX(int t, double X, double gama, double vex, double vey, double A, double
 	#pragma omp parallel for reduction(+:result2)
 	for (int n = 1; n <= N; n++) {
 		// brute_F
-		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*gama))/((1+pow((n*gama)/w,2)));
+		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*gama))/(1+pow((n*gama)/w,2));
 
 		if (n%2 == 0) {
 	        resultFn = - resultFn;
@@ -465,7 +464,7 @@ double vY(int t, double X, double gama, double vex, double vey, double A, double
 	#pragma omp parallel for reduction(+:result3)
 	for (int n = 1; n <= N; n++) {
 		//brute_C
-		aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
+		aux = 1/(n*pow(X, n))*(vex+(n*gama*vey)/(w*w))*(1/(1+(n*gama/w)*(n*gama/w)));
 
 		if (n%2 == 0) {
 	        aux = -aux;
