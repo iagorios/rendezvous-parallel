@@ -100,6 +100,7 @@ void main(int argc, char *argv[]) {
 
 						printf("\n ======== Saídas Finais ========\n");
 						printf("xt: %lf yt: %lf zt:%lf\n", fx, fy, fz);
+						printf("Vxt: %lf Vyt: %lf Vzt:%lf\n", fdx, fdy, fdz);
 						printf("R: %lf V:%lf\n", r,v);
 					}
 				}
@@ -552,23 +553,27 @@ double dZ(double t) {
  */
 double vX(double t) {
 	double resultFn = 0;
-	double result1 = 2 * ( (A * w * cos(w * t)) + (B * w * sin(w * t)) ) + E;
+	double result1 = 2 * ( (A * w * sin(w * t)) + (B * w * cos(w * t)) ) + E; // Modificado por Filipe: seno e coseno estavam trocados
 	double result2 = 0;
 	int n;
+
+	printf("result1 vX: %lf\n", result1);
 
 	for (n = 1; n <= N; n++) {
 		// brute_F
 		resultFn = (1/(n*pow(X,n)))*((2*vey)/w + (4*vex)/(n*Y))/((1+pow((n*Y)/w,2)));
 
 		if (n%2 == 0) {
-        resultFn = - resultFn;
-    }
+        	resultFn = - resultFn;
+    	}
 
 		resultFn -= vex/(n*Y);
 		//brute_F
 
 		result2 += resultFn * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
+
+	printf("Somatorio do vX: %lf\n", result2);
 
 	return result1 + result2;
 }
@@ -591,14 +596,18 @@ double vY(double t) {
 		aux = 1/(n*pow(X, n)) * (vex + (n * gama * vey)/(w*w)) * (1/(1 + (n*gama/w)*(n*gama/w) ));
 
 		if (n%2 == 0) {
-        aux = -aux;
-    }
+        	aux = -aux;
+    	}
 
-    resultCn+=aux;
+		// Modificado por Filipe: += removido
+    	resultCn=aux;
 		//brute_C
 
 		result3 += resultCn * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
+
+	printf("(vY) result1 + result2: %lf\n", (result1+result2));
+	printf("Somatorio do vY: %lf\n", result3);
 
 	return result1 + result2 + result3;
 }
@@ -620,14 +629,16 @@ double vZ(double t) {
 		resultJn = vez/(n*pow(X,n)*w)/(1+pow((n*Y)/w,2));
 
 		if (n%2 == 0) {
-        resultJn = -resultJn;
-    }
+        	resultJn = -resultJn;
+    	}
 		//brute_J
 
 		result3 += resultJn * ((-n) * gama * pow(M_E, -(n * gama * t)));
 	}
 
-	return result1 + result2 + result3;
+	printf("(vZ) result1 + result2: %lf\n", (result1+result2));
+	printf("Somatorio do vZ: %lf\n", result3);
+	return result1 + result2 - result3; // Modificado por Filipe: substituindo + result3 por - result3
 }
 
 /* @author Weverson
