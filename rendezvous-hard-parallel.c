@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <omp.h>
+#include <time.h>
+#include <omp.h>
+
+clock_t startTime, finalTime;
 
 //-------------------Functions-------------------
 double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E);
@@ -32,7 +35,7 @@ static int const N = 20;
  * main
  */
 void main(int argc, char *argv[]) {
-	
+	startTime = clock();
 	int Tmax = 86400;	
 	int NPI = atoi(argv[1]); // numero de posicoes iniciais
 	FILE *arq;
@@ -43,28 +46,32 @@ void main(int argc, char *argv[]) {
 	printf("Numero de posicoes iniciais: %d\n", NPI);
 
 	for(int np = 1; np <= NPI; np++) {
+		printf("Problema %d\n", np);
 		if(arq == NULL) {
 			printf("Erro, nao foi possivel abrir o arquivo\n");
 		} else {
 			fscanf(arq,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", &var1, &var1, &var1, &x, &y, &z, &var1, &xl0, &yl0, &zl0, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1);
 			printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
 		}
-		//#pragma omp parallel for
-		for(int VeAux = 10; VeAux<=10; VeAux++) {
+		#pragma omp parallel for
+		for(int VeAux = 1; VeAux<=10; VeAux++) {
+			printf("Ve %d\n", VeAux);
 			double Ve =VeAux;
             Ve = Ve/2;
             double vex, vey, vez;
             vex = vey = vez =Ve*Ve/3;
-            //#pragma omp parallel for 
-            for(int aux = 1; aux<=1; aux++){
+            #pragma omp parallel for 
+            for(int aux = -14; aux<=2; aux++){
+            	printf("Gama %d\n", aux);
 				double gama = pow(10, aux);
 				//int tid = omp_get_thread_num();
         		//printf("Hello world from omp thread %d\n", tid);
-                //#pragma omp parallel for firstprivate(z, x, y, zl0, xl0, yl0)
-				for(int Xaux=1; Xaux<=1; Xaux++) {
+                #pragma omp parallel for firstprivate(z, x, y, zl0, xl0, yl0)
+				for(int Xaux=1; Xaux<=100; Xaux++) {
+					printf("X %d\n", Xaux);
 					double X = Xaux;
 
-					printf("P A: y%lf xl0%lf gama%lf X%lf w%lf vex%lf", y, xl0, gama, X, w, vex);
+					//printf("P A: y%lf xl0%lf gama%lf X%lf w%lf vex%lf", y, xl0, gama, X, w, vex);
 
 					double A = brute_A (y, xl0, gama, X, vex, vey);
 					double B = brute_B (yl0, gama, X, vex, vey);
@@ -75,28 +82,34 @@ void main(int argc, char *argv[]) {
 					double I = brute_I (zl0, gama, X, vez);
 
 					//printf("\nA:%lf \nB:%lf \nD:%lf \nE:%lf \nG:%lf \nH:%lf \nI:%lf \n", A, B, D, E, G, H, I);
-                    //#pragma omp parallel for 
-					for(int t = 1; t <= 1; t++) {
+                    #pragma omp parallel for 
+					for(int t = 0; t <= Tmax; t++) {
+						//printf("t %d\n", t);
 						double fx = dX(t, vey, vex, gama, X, A, B, E, G);
                         double fy = dY(t, vex, vey, gama, X, A, B, D);
                         double fz = dZ(t, X, gama, vez, G, H, I);
 
 						double r = rT(fx, fy, fz);
-						double v;
+
 						if(r == 0) {
 							double fdx =  vX(t, X, gama, vex, vey, A, B, E);
                             double fdy =  vY(t, X, gama, vex, vey, A, B);
                             double fdz =  vZ(t, X, gama, vez, H, I);
 
-							v = vT( fdx, fdy, fdz);	
+							double v = vT( fdx, fdy, fdz);	
+							printf(" ======== Rendezvous encontrado! ========\n");
+							printf("R: %lf V:%lf\n", r,v);
 						}
-						printf(" ======== Saídas Finais ========\n");
-						printf("R: %lf V:%lf\n", r,v);
+						//printf(" ======== Saídas Finais ========\n");
+						//printf("R: %lf V:%lf\n", r,v);
 					}
 				}
 			}
 		}
 	}
+	finalTime = clock();
+   	double excecutionTime = (finalTime-startTime)/CLOCKS_PER_SEC;
+	printf("Tempo em segundos: %lf", excecutionTime);
 }
 
 /**
