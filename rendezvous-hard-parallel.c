@@ -31,16 +31,19 @@ int Alt= 220;
 double w = 398600.4418/sqrt((6378.0 + 220)*(6378.0 + 220)*(6378.0 + 220));
 
 static int const N = 20;
+double nave = 0;
+int go = 1;
 /* @author Gledson
  * main
  */
 void main(int argc, char *argv[]) {
 	startTime = clock();
-	int Tmax = 86400;	
+	int Tmax = 86400;
 	int NPI = atoi(argv[1]); // numero de posicoes iniciais
-	FILE *arq;
+	FILE *arq, *out;
 	char url[] = "in.dat";
 	arq = fopen(url, "r");
+	out = fopen("parallel-out.txt", "w");
 	double var1;
 
 	printf("Numero de posicoes iniciais: %d\n", NPI);
@@ -49,26 +52,27 @@ void main(int argc, char *argv[]) {
 		printf("Problema %d\n", np);
 		if(arq == NULL) {
 			printf("Erro, nao foi possivel abrir o arquivo\n");
+			exit(EXIT_FAILURE);
 		} else {
 			fscanf(arq,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", &var1, &var1, &var1, &x, &y, &z, &var1, &xl0, &yl0, &zl0, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1);
 			printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
 		}
 		#pragma omp parallel for
 		for(int VeAux = 1; VeAux<=10; VeAux++) {
-			printf("Ve %d\n", VeAux);
+			//printf("Ve %d\n", VeAux);
 			double Ve =VeAux;
             Ve = Ve/2;
             double vex, vey, vez;
             vex = vey = vez =Ve*Ve/3;
-            #pragma omp parallel for 
-            for(int aux = -14; aux<=2; aux++){
-            	printf("Gama %d\n", aux);
+            #pragma omp parallel for
+            for(int aux = -6; aux<=2; aux++){
+            	//printf("Gama %d\n", aux);
 				double gama = pow(10, aux);
 				//int tid = omp_get_thread_num();
         		//printf("Hello world from omp thread %d\n", tid);
                 #pragma omp parallel for firstprivate(z, x, y, zl0, xl0, yl0)
 				for(int Xaux=1; Xaux<=100; Xaux++) {
-					printf("X %d\n", Xaux);
+					//printf("X %d\n", Xaux);
 					double X = Xaux;
 
 					//printf("P A: y%lf xl0%lf gama%lf X%lf w%lf vex%lf", y, xl0, gama, X, w, vex);
@@ -82,7 +86,11 @@ void main(int argc, char *argv[]) {
 					double I = brute_I (zl0, gama, X, vez);
 
 					//printf("\nA:%lf \nB:%lf \nD:%lf \nE:%lf \nG:%lf \nH:%lf \nI:%lf \n", A, B, D, E, G, H, I);
-                    #pragma omp parallel for 
+					nave = nave + 1;
+					int ID = omp_get_thread_num();
+					printf("Thread %d: Simulando nave %.1f\n", ID, nave);
+					go = 1;
+					#pragma omp parallel for
 					for(int t = 0; t <= Tmax; t++) {
 						//printf("t %d\n", t);
 						double fx = dX(t, vey, vex, gama, X, A, B, E, G);
@@ -91,14 +99,19 @@ void main(int argc, char *argv[]) {
 
 						double r = rT(fx, fy, fz);
 
-						if(r == 0) {
+						if(r <= 0.003f && r >= -0.003f) {
 							double fdx =  vX(t, X, gama, vex, vey, A, B, E);
                             double fdy =  vY(t, X, gama, vex, vey, A, B);
                             double fdz =  vZ(t, X, gama, vez, H, I);
 
-							double v = vT( fdx, fdy, fdz);	
-							printf(" ======== Rendezvous encontrado! ========\n");
-							printf("R: %lf V:%lf\n", r,v);
+							double v = vT( fdx, fdy, fdz);
+							if(v <= 0.003f && v >= -0.003f) {
+								int ID = omp_get_thread_num();
+								printf("Thread %d: RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", ID, x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
+								fprintf(out, "RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
+								printf("R: %lf V:%lf\n", r,v);
+								t = Tmax + 1;
+							}
 						}
 						//printf(" ======== Saídas Finais ========\n");
 						//printf("R: %lf V:%lf\n", r,v);
@@ -107,6 +120,7 @@ void main(int argc, char *argv[]) {
 			}
 		}
 	}
+	fclose(out);
 	finalTime = clock();
    	double excecutionTime = (finalTime-startTime)/CLOCKS_PER_SEC;
 	printf("Tempo em segundos: %lf", excecutionTime);
@@ -441,7 +455,7 @@ double dZ(int t, double X, double gama, double vez, double G, double H, double I
 /* @author Weverson, Jhone, Gledson
  * vetor X da velocidade
  */
-double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E) {	
+double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E) {
 
 	double resultFn = 0;
 	double result1 = 2 * ( (A * w * sin(w * t)) + (B * w * cos(w * t)) ) + E;

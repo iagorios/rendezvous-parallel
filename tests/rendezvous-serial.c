@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
+
+clock_t startTime, finalTime;
 
 //-------------------Functions-------------------
 double vX(double t);
@@ -29,6 +32,7 @@ double A, B, C, D, E, F, G, H, I, J, r, v;
 double x=0, y=0, z=0, xl0=0, yl0=0, zl0=0, X=0, Y=0, vex=0, vey=0, vez=0, w=0, n=0, gama=0, Ve=0;
 
 static int const N = 20;
+double nave = 0;
 
 /* @author Gledson
  * @modified by Filipe
@@ -36,7 +40,7 @@ static int const N = 20;
  * main
  */
 void main(int argc, char *argv[]) {
-
+	startTime = clock();
 	int Alt= 220;
 	int deltaT = 1;
 	int Tmax = 86400, t;
@@ -56,7 +60,7 @@ void main(int argc, char *argv[]) {
 			exit(EXIT_FAILURE);
 		} else {
 			fscanf(arq,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", &var1, &var1, &var1, &x, &y, &z, &var1, &xl0, &yl0, &zl0, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1);
-			//printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
+			// printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
 		}
 
 		for(Ve = 0.5; Ve<=5.0; Ve=Ve+0.5 ) {
@@ -64,9 +68,10 @@ void main(int argc, char *argv[]) {
 			vex = vey = vez =Ve*Ve/3;
 			int aux = -14;
 
-			for(aux = -14; aux<=2; aux++){
+			for(aux = -6; aux<=2; aux++){
 				Y= pow(10, aux);
 				gama= Y; //gama sendo setada para evitar duplicatas
+				// printf("gama %Lf\n", gama);
 
 				for(X=1; X<=100; X++) {
 
@@ -83,8 +88,9 @@ void main(int argc, char *argv[]) {
 					I = brute_I (zl0, Y, X, w, vez);
 					J = brute_J (Y, X, w, vez, n);
 
-					//printf("\nA:%lf \nB:%lf \nC:%lf \nD:%lf \nE:%lf \nF:%lf \nG:%lf \nH:%lf \nI:%lf \nJ:%lf\n", A, B, C, D, E, F, G, H, I, J);
-
+					// printf("\nA:%lf \nB:%lf \nC:%lf \nD:%lf \nE:%lf \nF:%lf \nG:%lf \nH:%lf \nI:%lf \nJ:%lf\n", A, B, C, D, E, F, G, H, I, J);
+					nave = nave + 1;
+					printf("Simulando nave %.1f\n", nave);
 					for(t = 1; t <= Tmax; t++) {
 
 						double fx = dX(t);
@@ -95,8 +101,11 @@ void main(int argc, char *argv[]) {
 
 						// Checa se r está fora do limite de aceitação
 						if (r < -0.003f || r > 0.003f) {
+							// printf("Nave %.1f: Nao houve randezvous no t=%d. r=%lf\n", nave, t, r);
+							// system("pause");
 							continue;
 						} else {
+							printf("Nave %.1f: posicao no limite aceitavel!", nave);
 							double fdx=  vX(t);
 							double fdy=  vY(t);
 							double fdz=  vZ(t);
@@ -105,6 +114,7 @@ void main(int argc, char *argv[]) {
 
 							// Checa se v está fora do limite de aceitação
 							if (v < -0.003f || v > 0.003f) {
+								printf("Nave %f: Não houve randezvous no t=%d\n", nave, t);
 								continue; // Não houve randezvous. Testa no próximo tempo
 							} else { // Houve randezvous
 								printf("RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
@@ -122,6 +132,9 @@ void main(int argc, char *argv[]) {
 			}
 		}
 	}
+	finalTime = clock();
+   	double excecutionTime = (finalTime-startTime)/CLOCKS_PER_SEC;
+	printf("Tempo em segundos: %lf", excecutionTime);
 }
 
 /**
