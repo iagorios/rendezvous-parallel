@@ -2,29 +2,33 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <sys/time.h>
 //#include <omp.h>
 
-clock_t startTime, finalTime;
+double startTime, finalTime;
+time_t timer1, timer2;
+char buffer1[25], buffer2[25];
+struct tm* tm_info;
 
 //-------------------Functions-------------------
-double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E);
-double vY(int t, double X, double gama, double vex, double vey, double A, double B);
-double vZ(int t, double X, double gama, double vez, double H, double I);
+double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E, double vey2_w, double vex4, double gama_wpow);
+double vY(int t, double X, double gama, double vex, double vey, double A, double B, double gamavey_ww, double gama_wpow);
+double vZ(int t, double X, double gama,  double vez, double H, double I, double gama_wpow);
 
-double rT(double X, double gama, double Z);
+double rT(double fx, double fy, double fz);
 double vT(double dx, double dy, double dz);
 
-double dX(int t, double vey, double vex, double gama, double X, double A, double B, double E, double G);
-double dY(int t, double vex, double vey, double gama, double X, double A, double B, double D);
-double dZ(int t, double X, double gama, double vez, double G, double H, double I);
+double dX (int t, double vey, double vex, double gama, double X, double A, double B, double E, double G, double vey2_w, double vex4, double gama_wpow);
+double dY (int t, double vex, double vey, double gama, double X, double A, double B, double D, double gamavey_ww, double gama_wpow);
+double dZ (int t, double X, double gama, double vez, double G, double H, double I, double gama_wpow);
 
-double brute_A (double y0, double xl0, double gama, double X, double vex, double vey);
-double brute_B (double yl0, double gama, double X, double vex, double vey);
+double brute_A (double y0, double xl0, double gama, double X, double vex, double vey, double gamavey_ww, double gama_w, double vex2_w);
+double brute_B (double yl0,  double gama, double X, double vex, double vey, double gamavex_ww, double gama_wpow, double vey_w);
 double brute_D (double y0, double xl0, double X, double vex);
 double brute_E (double y0, double xl0, double X, double vex);
-double brute_G (double x0, double yl0, double X, double vex, double vey);
-double brute_H (double z0, double gama, double vex);
-double brute_I(double zl0, double gama, double X, double vez);
+double brute_G (double x0, double yl0, double X, double vex, double vey, double vex3);
+double brute_H (double z0, double gama, double vex, double vexgama, double gama_wpow);
+double brute_I (double zl0, double gama, double X, double vez, double gama_wpow);
 
 double x=0, y=0, z=0, xl0=0, yl0=0, zl0=0;
 int Alt= 220;
@@ -32,6 +36,12 @@ double w = 398600.4418/sqrt((6378.0 + 220)*(6378.0 + 220)*(6378.0 + 220));
 //otimizacao ---------------------
 double ww;
 //--------------------------------
+
+double getRealTime(){
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    return ((double)tm.tv_sec + (double)tm.tv_usec/1000000.0);
+}
 
 static int const N = 20;
 double nave = 0;
@@ -41,18 +51,22 @@ double nave = 0;
 void main(int argc, char *argv[]) {
     //otimizacao ----------------------
     ww = w*w;
+    //Start time
+    time(&timer1);
+    tm_info = localtime(&timer1);
+    strftime(buffer1, 25, "%d/%m/%Y %H:%M:%S", tm_info);
+    startTime = getRealTime(); 
 
     //---------------------------------
-    startTime = clock();
     int Tmax = 86400;
     int NPI = atoi(argv[1]); // numero de posicoes iniciais
     FILE *arq, *out;
     char url[] = "in.dat";
     arq = fopen(url, "r");
-    out = fopen("parallel-out.txt", "w");
+    out = fopen("serial-out.txt", "w");
     double var1;
 
-    //printf("Numero de posicoes iniciais: %d\n", NPI);
+    printf("executando...\n");
 
     for(int np = 1; np <= NPI; np++) {
         //printf("Problema %d\n", np);
@@ -68,44 +82,72 @@ void main(int argc, char *argv[]) {
             //printf("Ve %d\n", VeAux);
             double vex, vey, vez;
             vex = vey = vez =Ve*Ve/3;
+
+            //otimizacao -------------------------------
+            //brute_A
+            double vex2_w = (2*vex)/w;
+            //brute_B
+            double vey_w = vey/w;
+            //brute_G
+            double vex3 = vex*3;
+            //dx vx
+            double vey2_w = vex2_w;
+            double vex4 = vex*4;
+            //------------------------------------------
+
             //#pragma omp parallel for
             for(int aux = -14; aux<=2; aux++){
                 //printf("Gama %d\n", aux);
                 double gama = pow(10, aux);
+
+                //otimizacao -------------------------------
+                //brute_A
+                double gama_w = gama/w;
+                //brute_B
+                double gamavex_ww = (gama*vex)/ww;
+                //brute_H
+                double vexgama = vex*gama;
+                //dy vy A
+                double gamavey_ww = gamavex_ww;
+                //vx vy vz dx dy dz B H I
+                double gama_wpow = (gama/w)*(gama/w);
+                //------------------------------------------
+
                 //int tid = omp_get_thread_num();
                 //printf("Hello world from omp thread %d\n", tid);
                 //#pragma omp parallel for firstprivate(z, x, y, zl0, xl0, yl0)
                 for(int Xaux=1; Xaux<=100; Xaux++) {
                     //printf("X %d\n", Xaux);
-                    double X = Xaux;
+                    double X = Xaux;                   
 
                     //printf("P A: y%lf xl0%lf gama%lf X%lf w%lf vex%lf", y, xl0, gama, X, w, vex);
 
-                    double A = brute_A (y, xl0, gama, X, vex, vey);
-                    double B = brute_B (yl0, gama, X, vex, vey);
+                    double A = brute_A (y, xl0, gama, X, vex, vey, gamavey_ww, gama_w, vex2_w);
+                    double B = brute_B (yl0, gama, X, vex, vey, gamavex_ww, gama_wpow, vey_w);
                     double D = brute_D (y, xl0, X, vex);
                     double E = brute_E (y, xl0, X, vex);
-                    double G = brute_G (x, yl0, X, vex, vey);
-                    double H = brute_H (z, gama, vex);
-                    double I = brute_I (zl0, gama, X, vez);
+                    double G = brute_G (x, yl0, X, vex, vey, vex3);
+                    double H = brute_H (z, gama, vex, vexgama, gama_wpow);
+                    double I = brute_I (zl0, gama, X, vez, gama_wpow);
 
                     //printf("\nA:%lf \nB:%lf \nD:%lf \nE:%lf \nG:%lf \nH:%lf \nI:%lf \n", A, B, D, E, G, H, I);
-                    nave = nave + 1;
+                    //nave = nave + 1;
                     //int ID = omp_get_thread_num();
                     //printf("Simulando nave %.1f\n", nave);
                     //#pragma omp parallel for
                     for(int t = 1; t <= Tmax; t++) {
                         //printf("t %d\n", t);
-                        double fx = dX(t, vey, vex, gama, X, A, B, E, G);
-                        double fy = dY(t, vex, vey, gama, X, A, B, D);
-                        double fz = dZ(t, X, gama, vez, G, H, I);
+                        double fx = dX(t, vey, vex, gama, X, A, B, E, G, vey2_w, vex4, gama_wpow);
+                        double fy = dY(t, vex, vey, gama, X, A, B, D, gamavey_ww, gama_wpow);
+                        double fz = dZ(t, X, gama, vez, G, H, I, gama_wpow);
 
                         double r = rT(fx, fy, fz);
 
                         if(r <= 0.003f && r >= -0.003f) {
-                            double fdx =  vX(t, X, gama, vex, vey, A, B, E);
-                            double fdy =  vY(t, X, gama, vex, vey, A, B);
-                            double fdz =  vZ(t, X, gama, vez, H, I);
+                            double fdx =  vX(t, X, gama, vex, vey, A, B, E, vey2_w, vex4, gama_wpow);
+                            double fdy =  vY(t, X, gama, vex, vey, A, B, gamavey_ww, gama_wpow);
+                            double fdz =  vZ(t, X, gama, vez, H, I, gama_wpow);
+
 
                             double v = vT( fdx, fdy, fdz);
                             if(v <= 0.003f && v >= -0.003f) {
@@ -123,10 +165,15 @@ void main(int argc, char *argv[]) {
             }
         }
     }
-    finalTime = clock();
-    double excecutionTime = (finalTime-startTime)/CLOCKS_PER_SEC;
-    fprintf(out, "Tempo em segundos: %lf", excecutionTime);
+    time(&timer2);
+    tm_info = localtime(&timer2);
+    strftime(buffer2, 25, "%d/%m/%Y %H:%M:%S", tm_info);
+    
+    finalTime = getRealTime();
+
+    fprintf(out,"\nTempo de execucao: %f segundos\n",finalTime-startTime);
     fclose(out);
+    printf("concluido!\n");
 }
 
 /**
@@ -150,17 +197,13 @@ void main(int argc, char *argv[]) {
 * @param vez VariÃ¡vel fÃ­sica da Velocidade de exaustÃ£o no eixo Z a ser calculado o valor de A
 * @returns O coeficiÃªnte A dado os valores iniciais e as variÃ¡veis fÃ­sicas a serem testadas
 */
-double brute_A (double y0, double xl0, double gama, double X, double vex, double vey) {
+double brute_A (double y0, double xl0, double gama, double X, double vex, double vey, double gamavey_ww, double gama_w, double vex2_w) {
     double result = 0;
     double aux;
     double sum = 0;
 
     result = (2*xl0)/w - 3*y0 +((2*vex)/w)*log((X+1)/X);
 
-    //otimizacao
-    double gamavey_ww = (gama*vey)/ww;
-    double gama_w = gama/w;
-    double vex2_w = (2*vex)/w;
     //Calculo do somatorio
     ////#pragma omp parallel for reduction(+:sum) private(aux)
     for (int n = 1; n <= N; n++) {
@@ -198,17 +241,13 @@ double brute_A (double y0, double xl0, double gama, double X, double vex, double
 * @param vez VariÃ¡vel fÃ­sica da Velocidade de exaustÃ£o no eixo Z a ser calculado o valor de B
 * @returns O coeficiÃªnte B dado os valores iniciais e as variÃ¡veis fÃ­sicas a serem testadas
 */
-double brute_B (double yl0,  double gama, double X, double vex, double vey) {
+double brute_B (double yl0,  double gama, double X, double vex, double vey, double gamavex_ww, double gama_wpow, double vey_w) {
     double result = 0;
     double sum = 0;
     double aux;
 
     result = yl0/w + (vey/w)*log((X+1)/X);
 
-    //otimizacao
-    double gamavex_ww = (gama*vex)/ww;
-    double gama_wpow = (gama/w)*(gama/w);
-    double vey_w = vey/w;
     //Calculo do somatorio
     ////#pragma omp parallel for reduction(+:sum) private(aux)
     for (int n = 1; n <= N; n++) {
@@ -300,14 +339,12 @@ double brute_E (double y0, double xl0, double X, double vex) {
 * @param vey VariÃ¡vel fÃ­sica da Velocidade de exaustÃ£o no eixo Y a ser calculado o valor de G
 * @returns o coeficiÃªnte G dado os valores iniciais e as variÃ¡veis fÃ­sicas a serem testadas
 */
-double brute_G (double x0, double yl0, double X, double vex, double vey) {
+double brute_G (double x0, double yl0, double X, double vex, double vey, double vex3) {
     double result = 0;
     double sum = 0;
     double aux;
 
     result= 2*yl0/w + x0 + (2*vey*(log((X+1)/X)))/w;
-    //otimizacao
-    double vex3 = vex*3;
     ////#pragma omp parallel for reduction(+:sum) private(aux)
     for (int n = 1; n <= N; n++) {
         aux = vex3/(n*n*pow(X,n)*w);
@@ -344,15 +381,12 @@ double brute_G (double x0, double yl0, double X, double vex, double vey) {
 * @param vez VariÃ¡vel fÃ­sica da Velocidade de exaustÃ£o no eixo Z a ser calculado o valor de H
 * @returns O coeficiÃªnte H dado os valores iniciais e as variÃ¡veis fÃ­sicas a serem testadas
 */
-double brute_H (double z0, double gama, double vex) {
+double brute_H (double z0, double gama, double vex, double vexgama, double gama_wpow) {
     double result = 0;
     double sum = 0;
     double aux;
 
     result = z0;
-    //otimizacao
-    double vexgama = vex*gama;
-    double gama_wpow = (gama/w)*(gama/w);
     //Calculo do somatorio
     ////#pragma omp parallel for reduction(+:sum) private(aux)
     for (int n = 1; n <= N; n++) {
@@ -379,15 +413,12 @@ double brute_H (double z0, double gama, double vex) {
 * @param vez VariÃ¡vel fÃ­sica da Velocidade de exaustÃ£o no eixo Z a ser calculado o valor de I
 * @returns o coeficiÃªnte I dado os valores iniciais e as variÃ¡veis fÃ­sicas a serem testadas
 */
-double brute_I(double zl0, double gama, double X, double vez) {
+double brute_I (double zl0, double gama, double X, double vez, double gama_wpow) {
     double result = 0;
     double sum = 0;
     double aux;
 
     result = zl0/w - (vez/w)*(log((X+1)/X));
-
-    //otimizacao
-    double gama_wpow = (gama/w)*(gama/w);
 
     //Calculo do somatorio
     ////#pragma omp parallel for reduction(+:sum) private(aux)
@@ -407,18 +438,14 @@ double brute_I(double zl0, double gama, double X, double vez) {
 /* @author Weverson, Iago
  * vetor X da distancia
  */
-double dX(int t, double vey, double vex, double gama, double X, double A, double B, double E, double G) {
+double dX (int t, double vey, double vex, double gama, double X, double A, double B, double E, double G, double vey2_w, double vex4, double gama_wpow) {
     //otimizacao
     double wt = w*t;
+    double gamat = gama*t;
 
     double resultFn = 0;
     double result1 = 2 * (A*sin(wt)-B*cos(wt))+E*t;
-    double result2 = G;
-    //otimizacao
-    double vey2_w = (2*vey)/w;
-    double vex4 = vex*4;
-    double gama_wpow = (gama/w)*(gama/w);
-    double gamat = gama*t;
+    double result2 = G;    
 
     ////#pragma omp parallel for reduction(+:result2)
     for (int n = 1; n <= N; n++) {
@@ -436,18 +463,15 @@ double dX(int t, double vey, double vex, double gama, double X, double A, double
     return result1 + result2;
 }
 
-double dY (int t, double vex, double vey, double gama, double X, double A, double B, double D) {
+double dY (int t, double vex, double vey, double gama, double X, double A, double B, double D, double gamavey_ww, double gama_wpow) {
     //otimizacao
-    double wt = w*t;
+    double wt = w*t;    
+    double gamat = gama*t;
 
     double resultCn = 0;
     double result1 = A*cos(wt)+B*sin(wt);
     double result2 = D;
 
-    //otimizacao
-    double gama_wpow = (gama/w)*(gama/w);
-    double gamavey_ww = (gama*vey)/ww;
-    double gamat = gama*t;
     ////#pragma omp parallel for reduction(+:result2)
     for (int n = 1; n < N; ++n){
         //brute_C
@@ -466,17 +490,15 @@ double dY (int t, double vex, double vey, double gama, double X, double A, doubl
 /* @author Weverson, Iago
  * vetor Z da distancia
  */
-double dZ(int t, double X, double gama, double vez, double G, double H, double I) {
+double dZ (int t, double X, double gama, double vez, double G, double H, double I, double gama_wpow) {
     //otimizacao
     double wt = w*t;
+    double gamat = gama*t;
 
     double resultJn = 0;
     double result1 = H * cos(wt) + I * sin(wt);
     double result2 = 0;
 
-    //otimizacao
-    double gama_wpow = (gama/w)*(gama/w);
-    double gamat = gama*t;
     ////#pragma omp parallel for reduction(+:result2)
     for (int n = 1; n <= N; n++) {
         //brute_J
@@ -494,19 +516,15 @@ double dZ(int t, double X, double gama, double vez, double G, double H, double I
 /* @author Weverson, Jhone, Gledson
  * vetor X da velocidade
  */
-double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E) {
+double vX(int t, double X, double gama, double vex, double vey, double A, double B, double E, double vey2_w, double vex4, double gama_wpow) {
     //otimizacao
     double wt = w*t;
+    double gamat = gama*t;
 
     double resultFn = 0;
     double result1 = 2 * ((A*w*sin(wt)) + (B*w*cos(wt)));
     double result2 = E;
 
-    //otimizacao
-    double vey2_w = (2*vey)/w;
-    double vex4 = vex*4;
-    double gama_wpow = (gama/w)*(gama/w);
-    double gamat = gama*t;
     ////#pragma omp parallel for reduction(+:result2)
     for (int n = 1; n <= N; n++) {
         // brute_F
@@ -527,18 +545,15 @@ double vX(int t, double X, double gama, double vex, double vey, double A, double
 /* @author Weverson, Jhone, Gledson
  * vetor Y da velocidade
  */
-double vY(int t, double X, double gama, double vex, double vey, double A, double B) {
+double vY(int t, double X, double gama, double vex, double vey, double A, double B, double gamavey_ww, double gama_wpow) {
     //otimizacao
     double wt = w*t;
+    double gamat = gama*t;
 
     double resultCn = 0;
     double result1 = (-A)*w*sin(wt)+B*w*cos(wt);
     double result2 = 0;
 
-    //otimizacao
-    double gamavey_ww = (gama*vey)/ww;
-    double gama_wpow = (gama/w)*(gama/w);
-    double gamat = gama*t;
     ////#pragma omp parallel for reduction(+:result2)
     for (int n = 1; n <= N; n++) {
         //brute_C
@@ -558,17 +573,15 @@ double vY(int t, double X, double gama, double vex, double vey, double A, double
 /* @author Weverson
  * vetor Z da velocidade
  */
-double vZ(int t, double X, double gama,  double vez, double H, double I) {
+double vZ(int t, double X, double gama,  double vez, double H, double I, double gama_wpow) {
     //otimizacao
-    double wt = w*t;
+    double wt = w*t;    
+    double gamat = gama*t;
 
     double resultJn = 0;
     double result1 = (-H)*w*sin(wt)+I*w*cos(wt);
     double result2 = 0;
 
-    //otimizacao
-    double gama_wpow = (gama/w)*(gama/w);
-    double gamat = gama*t;
     ////#pragma omp parallel for reduction(+:result3)
     for (int n = 1; n <= N; n++) {
         //brute_J
@@ -588,8 +601,8 @@ double vZ(int t, double X, double gama,  double vez, double H, double I) {
  * Modificada por Gledson
  * Velocidade
  */
-double rT(double X, double gama, double Z) {
-    return sqrt(X*X + gama*gama + Z*Z);
+double rT(double fx, double fy, double fz) {
+    return sqrt(fx*fx + fy*fy + fz*fz);
 }
 
 /* @author Weverson
