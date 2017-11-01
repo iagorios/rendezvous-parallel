@@ -113,7 +113,7 @@ void main(int argc, char *argv[]) {
                                 //printf("Thread %d: RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", ID, x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
                                 fprintf(out, "RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
                                 printf("R: %lf V:%lf\n", r,v);
-                                t = Tmax + 1;
+                                //t = Tmax + 1;
                             }
                         }
                         //printf("\n ======== Saídas Finais ========\n");

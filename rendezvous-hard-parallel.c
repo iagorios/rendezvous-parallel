@@ -115,7 +115,7 @@ void main(int argc, char *argv[]) {
 								printf("Thread %d: RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", ID, x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
 								fprintf(out, "RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
 								printf("R: %lf V:%lf\n", r,v);
-								t = Tmax + 1;
+								//t = Tmax + 1;
 							}
 						}
 						//printf(" ======== Saídas Finais ========\n");
@@ -571,7 +571,7 @@ double vZ(int t, double X, double gama,  double vez, double H, double I) {
 	//otimizacao	
 	double gama_wpow = (gama/w)*(gama/w);
 	double gamat = gama*t;
-	//#pragma omp parallel for reduction(+:result3)
+	//#pragma omp parallel for reduction(+:result2)
 	for (int n = 1; n <= N; n++) {
 		//brute_J
 		resultJn = vez/(n*pow(X,n)*w)/(1+(n*n*gama_wpow));
