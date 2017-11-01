@@ -64,7 +64,7 @@ void main(int argc, char *argv[]) {
             printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
         }
         //#pragma omp parallel for
-        for(double VeAux = 0.5; Ve<=5; Ve+=0.5) {
+        for(double Ve = 0.5; Ve<=5; Ve+=0.5) {
             //printf("Ve %d\n", VeAux);
             double vex, vey, vez;
             vex = vey = vez =Ve*Ve/3;
