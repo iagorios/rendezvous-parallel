@@ -35,11 +35,11 @@ double ww;
 
 static int const N = 20;
 double nave = 0;
-/* 
+/*
  * main
  */
 void main(int argc, char *argv[]) {
-    //otimizacao ---------------------- 
+    //otimizacao ----------------------
     ww = w*w;
 
     //---------------------------------
@@ -52,16 +52,16 @@ void main(int argc, char *argv[]) {
     out = fopen("parallel-out.txt", "w");
     double var1;
 
-    printf("Numero de posicoes iniciais: %d\n", NPI);
+    //printf("Numero de posicoes iniciais: %d\n", NPI);
 
     for(int np = 1; np <= NPI; np++) {
-        printf("Problema %d\n", np);
+        //printf("Problema %d\n", np);
         if(arq == NULL) {
-            printf("Erro, nao foi possivel abrir o arquivo\n");
+            //printf("Erro, nao foi possivel abrir o arquivo\n");
             exit(EXIT_FAILURE);
         } else {
             fscanf(arq,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", &var1, &var1, &var1, &x, &y, &z, &var1, &xl0, &yl0, &zl0, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1, &var1);
-            printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
+            //printf("%lf %lf %lf %lf %lf %lf\n", x, y, z, xl0, yl0, zl0);
         }
         //#pragma omp parallel for
         for(double Ve = 0.5; Ve<=5; Ve+=0.5) {
@@ -92,7 +92,7 @@ void main(int argc, char *argv[]) {
                     //printf("\nA:%lf \nB:%lf \nD:%lf \nE:%lf \nG:%lf \nH:%lf \nI:%lf \n", A, B, D, E, G, H, I);
                     nave = nave + 1;
                     //int ID = omp_get_thread_num();
-                    printf("Simulando nave %.1f\n", nave);
+                    //printf("Simulando nave %.1f\n", nave);
                     //#pragma omp parallel for
                     for(int t = 1; t <= Tmax; t++) {
                         //printf("t %d\n", t);
@@ -112,7 +112,7 @@ void main(int argc, char *argv[]) {
                                 //int ID = omp_get_thread_num();
                                 //printf("Thread %d: RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", ID, x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
                                 fprintf(out, "RANDEZVOUS %lf %lf %lf %lf %lf %lf %lf %lf %lf %d\n", x, y, z, xl0, yl0, zl0, X, gama, Ve, t);
-                                printf("R: %lf V:%lf\n", r,v);
+                                //printf("R: %lf V:%lf\n", r,v);
                                 t = Tmax + 1;
                             }
                         }
@@ -123,10 +123,10 @@ void main(int argc, char *argv[]) {
             }
         }
     }
-    fclose(out);
     finalTime = clock();
     double excecutionTime = (finalTime-startTime)/CLOCKS_PER_SEC;
-    printf("Tempo em segundos: %lf", excecutionTime);
+    fprintf(out, "Tempo em segundos: %lf", excecutionTime);
+    fclose(out);
 }
 
 /**
@@ -348,7 +348,7 @@ double brute_H (double z0, double gama, double vex) {
     double result = 0;
     double sum = 0;
     double aux;
-    
+
     result = z0;
     //otimizacao
     double vexgama = vex*gama;
@@ -446,7 +446,7 @@ double dY (int t, double vex, double vey, double gama, double X, double A, doubl
 
     //otimizacao
     double gama_wpow = (gama/w)*(gama/w);
-    double gamavey_ww = (gama*vey)/ww;    
+    double gamavey_ww = (gama*vey)/ww;
     double gamat = gama*t;
     ////#pragma omp parallel for reduction(+:result2)
     for (int n = 1; n < N; ++n){
@@ -535,8 +535,8 @@ double vY(int t, double X, double gama, double vex, double vey, double A, double
     double result1 = (-A)*w*sin(wt)+B*w*cos(wt);
     double result2 = 0;
 
-    //otimizacao    
-    double gamavey_ww = (gama*vey)/ww;  
+    //otimizacao
+    double gamavey_ww = (gama*vey)/ww;
     double gama_wpow = (gama/w)*(gama/w);
     double gamat = gama*t;
     ////#pragma omp parallel for reduction(+:result2)
@@ -566,7 +566,7 @@ double vZ(int t, double X, double gama,  double vez, double H, double I) {
     double result1 = (-H)*w*sin(wt)+I*w*cos(wt);
     double result2 = 0;
 
-    //otimizacao    
+    //otimizacao
     double gama_wpow = (gama/w)*(gama/w);
     double gamat = gama*t;
     ////#pragma omp parallel for reduction(+:result3)
