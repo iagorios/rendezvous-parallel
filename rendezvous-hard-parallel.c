@@ -71,7 +71,7 @@ void main(int argc, char *argv[]) {
             double vex, vey, vez;
             vex = vey = vez =Ve*Ve/3;
             #pragma omp parallel for
-            for(int aux = -6; aux<=2; aux++){
+            for(int aux = -14; aux<=2; aux++){
             	//printf("Gama %d\n", aux);
 				double gama = pow(10, aux);
 				//int tid = omp_get_thread_num();
