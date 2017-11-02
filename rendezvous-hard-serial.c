@@ -135,7 +135,7 @@ void main(int argc, char *argv[]) {
                     //int ID = omp_get_thread_num();
                     //printf("Simulando nave %.1f\n", nave);
                     //#pragma omp parallel for
-                    for(int t = 1; t <= Tmax; t++) {
+                    for(int t = 0; t <= Tmax; t++) {
                         //printf("t %d\n", t);
                         double fx = dX(t, vey, vex, gama, X, A, B, E, G, vey2_w, vex4, gama_wpow);
                         double fy = dY(t, vex, vey, gama, X, A, B, D, gamavey_ww, gama_wpow);
