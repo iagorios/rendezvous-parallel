@@ -2,7 +2,7 @@
 
 Prepando a execução
 
-1- Clonar o repositório
+1- Clonar o repositório <br />
 2- Inserir o arquivo de entrada com o nome "in.dat" na pasta clonada.
 
 Executando o código serial
