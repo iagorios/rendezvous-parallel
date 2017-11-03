@@ -1,6 +1,6 @@
 # rendezvous-parallel
 
-Prepando a execução
+Preparando a execução
 
 1- Clonar o repositório <br />
 2- Inserir o arquivo de entrada com o nome "in.dat" na pasta clonada.
@@ -13,7 +13,7 @@ gcc rendezvous-serial.c -o rendezvous-serial.o -lm
 
 ```
 
-Executando o código serial
+Executando o código paralelo
 ```
 gcc rendezvous-openMP.c -o rendezvous-openMP.o -lm -fopenmp
 
